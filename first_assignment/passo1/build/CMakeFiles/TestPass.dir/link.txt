@@ -1,0 +1,1 @@
+/Library/Developer/CommandLineTools/usr/bin/c++  -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX15.2.sdk -dynamiclib -Wl,-headerpad_max_install_names -L/usr/local/opt/llvm/lib -o libTestPass.dylib -install_name @rpath/libTestPass.dylib CMakeFiles/TestPass.dir/LocalOpts.cpp.o  -undefined dynamic_lookup
