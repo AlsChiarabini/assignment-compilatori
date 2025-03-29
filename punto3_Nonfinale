@@ -1,0 +1,125 @@
+using namespace llvm;
+
+//la funzione controlla se le due operazioni sono "duali" ovvero semplificabili
+Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp, Value *X, int64_t constVal, int64_t constVal2) {
+
+
+    // Caso: a = b + C, c = a - C  =>  c = b
+    if (BinOp->getOpcode() == Instruction::Add &&
+        NextBinOp->getOpcode() == Instruction::Sub &&
+        constVal == constVal2) {
+        return X;
+    }      
+    else if (BinOp->getOpcode() == Instruction::Sub &&                  // Caso: a = b + C, c = a - C  =>  c = b
+             NextBinOp->getOpcode() == Instruction::Add &&
+             constVal == constVal2) {
+        return X;
+    }
+    else if (BinOp->getOpcode() == Instruction::Mul &&                  // Caso: a = b * C, c = a / C → c = b
+             NextBinOp->getOpcode() == Instruction::SDiv &&
+             constVal == constVal2 && constVal != 0) {
+        return X;
+    }
+    else if (BinOp->getOpcode() == Instruction::SDiv &&                 // Caso: a = b / C, c = a * C → c = b
+             NextBinOp->getOpcode() == Instruction::Mul &&
+             constVal == constVal2 && constVal != 0) {
+        return X;
+    }
+    return nullptr;
+}
+
+
+
+
+// data una istruzione binaria controlla le successive e chiama  "trova_op_duale" per controllare se semplificabili
+bool controlla_prossime_istruzioni(BinaryOperator *BinOp, BasicBlock::iterator Iter, BasicBlock &BB) {
+    bool modifica = false;
+    Value *X = BinOp->getOperand(0);
+    Value *Y = BinOp->getOperand(1);
+    
+	// QUI DEVO SISTEMARE perchè:  (scritto in assignment)
+	
+	
+	
+    if (auto *C1 = dyn_cast<ConstantInt>(Y)) {              // Controllo se il secondo operando è una costante
+        int64_t constVal = C1->getSExtValue();
+
+
+        // Scorro le prossime istruzioni per trovare un'operazione duale
+        for (auto NextIter = Iter; NextIter != BB.end();) {
+            Instruction *NextInst = &*NextIter++;
+
+
+            if (auto *NextBinOp = dyn_cast<BinaryOperator>(NextInst)) {
+                Value *A = NextBinOp->getOperand(0);
+                Value *B = NextBinOp->getOperand(1);
+
+
+                if (A == BinOp) {                       // La seconda operazione usa il risultato della prima come primo operando
+                    if (auto *C2 = dyn_cast<ConstantInt>(B)) {		//controllo se secondo operando è una costante
+                        int64_t constVal2 = C2->getSExtValue();
+                       
+                        // siamo nella situazione   "Binop = X <op> c1; ..;  NextBinop = Binop <op> c2"
+                       
+                        Value *replacement = trova_op_duale(BinOp, NextBinOp, X, constVal, constVal2);
+
+
+                        // se replacement allora trovata operazione duale e quindi semplificabile con "X"
+                        if (replacement) {
+                            NextBinOp->replaceAllUsesWith(replacement);
+                            NextBinOp->eraseFromParent();
+                            modifica = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool runOnBasicBlock(BasicBlock &B) {
+    bool changed = false;
+
+
+    for (auto Iter = B.begin(); Iter != B.end();) {
+        Instruction *Inst = &*Iter++;
+
+
+        if (auto *BinOp = dyn_cast<BinaryOperator>(Inst)) {
+            if (controlla_prossime_istruzioni(BinOp, Iter, B))
+                changed = true;
+        }
+    }
+
+
+    return changed;
+}
+
+
+
+
+
+
+bool runOnFunction(Function &F) {
+    bool Transformed = false;
+    for (auto &BB : F) {
+        Transformed = runOnBasicBlock(BB);
+    }
+    return Transformed;
+}
+
+
