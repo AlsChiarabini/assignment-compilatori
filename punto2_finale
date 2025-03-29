@@ -86,14 +86,14 @@ bool optimizeDiv(BinaryOperator *BinOP) {
 }
 
 bool runOnBasicBlock(BasicBlock &B) {
-    bool changed = false;
+    bool modifica = false;
     for (auto Iter = B.begin(); Iter != B.end(); ) {
         Instruction &Inst = *Iter++;
         if (BinaryOperator *BinOP = dyn_cast<BinaryOperator>(&Inst)) {
             changed = optimizeMul(BinOP) || optimizeDiv(BinOP);        //sfruttiamo il corto cicuito
         }
     }
-    return changed;
+    return modifica;
 }
 
 bool runOnFunction(Function &F) {
