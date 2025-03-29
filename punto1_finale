@@ -1,6 +1,9 @@
 using namespace llvm;
 #include <cmath>
 
+//  "prova_opt_<op>" tentano se possibile di ottimizzare il tipo di  operazione <op> 
+
+
 Value* prova_opt_Somma(BinaryOperator *inst) {
     if (inst->getOpcode() == Instruction::Add) {
         
@@ -35,7 +38,7 @@ Value* prova_opt_Sub(BinaryOperator *inst) {
 }
 
 
-
+// Controllo commutativo
 Value* prova_opt_Mul(BinaryOperator *inst) {
     if (inst->getOpcode() == Instruction::Mul) {
         
@@ -56,7 +59,7 @@ Value* prova_opt_Mul(BinaryOperator *inst) {
     return nullptr;
 }
 
-Value* prova_opt_Div(BinaryOperator *inst) {        //SDiv quando il dividendo è <0
+Value* prova_opt_Div(BinaryOperator *inst) {        
     if (inst->getOpcode() == Instruction::SDiv || inst->getOpcode() == Instruction::UDiv) { 
         if (ConstantInt *C = dyn_cast<ConstantInt>(inst->getOperand(1))) {
             if (C->isOne()) { 
