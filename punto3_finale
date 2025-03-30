@@ -1,0 +1,127 @@
+using namespace llvm;
+
+
+
+
+Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp) {
+   int64_t constVal = 0;
+   int64_t constVal2 = 0;
+   Value *varOp = nullptr;
+
+   // Identifica la costante e la variabile in BinOp
+   if (auto *C1 = dyn_cast<ConstantInt>(BinOp->getOperand(1))) {
+       constVal = C1->getSExtValue();
+       varOp = BinOp->getOperand(0);  
+   } else if (auto *C2 = dyn_cast<ConstantInt>(BinOp->getOperand(0))) {
+       constVal = C2->getSExtValue();
+       varOp = BinOp->getOperand(1); 
+   }
+
+   // Identifica la costante in NextBinOp
+   if (auto *C1 = dyn_cast<ConstantInt>(NextBinOp->getOperand(1))) {
+       constVal2 = C1->getSExtValue();
+   } else if (auto *C2 = dyn_cast<ConstantInt>(NextBinOp->getOperand(0))) {
+       constVal2 = C2->getSExtValue();
+   }
+
+   // Verifica se le operazioni sono duali e restituisce la variabile per il replace
+   if ((BinOp->getOpcode() == Instruction::Add && NextBinOp->getOpcode() == Instruction::Sub && constVal == constVal2) ||
+       (BinOp->getOpcode() == Instruction::Sub && NextBinOp->getOpcode() == Instruction::Add && constVal == constVal2) ||
+       (BinOp->getOpcode() == Instruction::Mul && NextBinOp->getOpcode() == Instruction::SDiv && constVal == constVal2 && constVal != 0) ||
+       (BinOp->getOpcode() == Instruction::SDiv && NextBinOp->getOpcode() == Instruction::Mul && constVal == constVal2 && constVal != 0)) {
+       	outs() << "Ottimizzazione effettuata: caso regolare\n";
+       return varOp;
+   }
+
+
+    //Nel caso di mul e add potrei avere che BinOp siano due operandi costanti!  (vedi codice del test)
+    // es    %1 = mul  3 , 5
+    //       %2 = div %1 , 3     E anche %2 = div %1 , 5    sono ottimizzabili
+    // attualmente quindi abbiamo controllato (per add/mul) solo il caso con la costante a 2° operando quindi testo anche l'altro
+    if (BinOp->getOpcode() == Instruction::Add  ||  BinOp->getOpcode() == Instruction::Mul){
+        if (auto *C = dyn_cast<ConstantInt>(BinOp->getOperand(0))){
+            constVal = C->getSExtValue();
+            varOp = BinOp->getOperand(1);
+        }
+        //verifico che ho una operazione duale alla add / mul
+        if ((BinOp->getOpcode() == Instruction::Add && NextBinOp->getOpcode() == Instruction::Sub && constVal == constVal2) ||
+                (BinOp->getOpcode() == Instruction::Mul && NextBinOp->getOpcode() == Instruction::SDiv && constVal == constVal2 && constVal != 0)   ){
+                    outs() << "Ottimizzazione effettuata: caso 'speciale' per add/mul\n";
+                    return varOp;
+                }
+    }
+
+
+   return nullptr;
+}
+
+
+
+
+bool controlla_prossime_istruzioni(BinaryOperator *BinOp, BasicBlock::iterator Iter, BasicBlock &BB) {
+   bool modifica = false;
+   Value *X = BinOp->getOperand(0);
+   Value *Y = BinOp->getOperand(1);
+
+
+
+
+   if (dyn_cast<ConstantInt>(Y) || ((BinOp->getOpcode() == Instruction::Add || BinOp->getOpcode() == Instruction::Mul) && dyn_cast<ConstantInt>(X))) {
+       std::vector<Instruction*> to_erase;
+       for (auto NextIter = std::next(Iter); NextIter != BB.end(); ++NextIter) {
+           Instruction *NextInst = &*NextIter;
+           if (auto *NextBinOp = dyn_cast<BinaryOperator>(NextInst)) {
+               Value *A = NextBinOp->getOperand(0);
+               Value *B = NextBinOp->getOperand(1);
+               if (A == BinOp || ((NextBinOp->getOpcode() == Instruction::Add || NextBinOp->getOpcode() == Instruction::Mul) && B == BinOp)) {
+                    outs() << "cerco op duale\n";
+                   Value *replacement = trova_op_duale(BinOp, NextBinOp);
+                   if (replacement) {
+                   	outs() << "Replacement con: ";
+                   	replacement->print(llvm::outs());
+                   	outs() << "\n";
+                       NextBinOp->replaceAllUsesWith(replacement);
+                       to_erase.push_back(NextBinOp);
+                       modifica = true;
+                   }
+               }
+           }
+       }
+       for (auto *Inst : to_erase) {
+           Inst->eraseFromParent();
+       }
+   }
+   return modifica;
+}
+
+
+
+
+bool runOnBasicBlock(BasicBlock &B) {
+   bool modifica = false;
+   for (auto Iter = B.begin(); Iter != B.end(); ++Iter) {
+       if (auto *BinOp = dyn_cast<BinaryOperator>(&*Iter)) {
+           if (controlla_prossime_istruzioni(BinOp, Iter, B))
+               modifica = true;
+       }
+   }
+   return modifica;
+}
+
+
+
+
+
+
+bool runOnFunction(Function &F) {
+   bool Transformed = false;
+   for (auto &BB : F) {
+       if (runOnBasicBlock(BB))
+           Transformed = true;
+   }
+   return Transformed;
+}
+
+
+
+
