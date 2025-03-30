@@ -2,6 +2,10 @@ using namespace llvm;
 
 
 
+// si ritorna varOp SOLO se abbiamo trovato che le due operazioni siano duali  (es sub ==> mul) e che le costanti siano uguali
+// sono gestiti TUTTI i casi ovvero:
+// Nel caso classico abbiamo:    a=b/3  c=3*a oppure c=a*3
+// Se  la prima istruzione  è sum e mul potrebbero avere due costanti es  "mul 5,3" e cercheremo entrambi i casi!
 
 Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp) {
    int64_t constVal = 0;
@@ -57,7 +61,10 @@ Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp) {
 
 
 
-
+// in questa funzione avviene il controllo di idoneità tra BinOp (la istruzione in questione) e le successive, sono idonee se:
+// - entrambi hanno una costante , la successiva USA la prima e l'operazione è la duale    [per add e mul si considera la commutatività]
+//  es:  se ho  BinOP:   a=b-C   allora è idonea   c=a+C  oppure  c=C+a           ("C" costante) 
+//  il controllo che effettivamente le costanti siano uguali e le operazioni duali  viene lasciato a "trova_op_duali"
 bool controlla_prossime_istruzioni(BinaryOperator *BinOp, BasicBlock::iterator Iter, BasicBlock &BB) {
    bool modifica = false;
    Value *X = BinOp->getOperand(0);
@@ -77,9 +84,7 @@ bool controlla_prossime_istruzioni(BinaryOperator *BinOp, BasicBlock::iterator I
                     outs() << "cerco op duale\n";
                    Value *replacement = trova_op_duale(BinOp, NextBinOp);
                    if (replacement) {
-                   	outs() << "Replacement con: ";
-                   	replacement->print(llvm::outs());
-                   	outs() << "\n";
+                   	
                        NextBinOp->replaceAllUsesWith(replacement);
                        to_erase.push_back(NextBinOp);
                        modifica = true;
@@ -96,7 +101,7 @@ bool controlla_prossime_istruzioni(BinaryOperator *BinOp, BasicBlock::iterator I
 
 
 
-
+//per ogni istruzione binaria cerca tra le prossime istruzioni una potenziale istruzione "duale"  
 bool runOnBasicBlock(BasicBlock &B) {
    bool modifica = false;
    for (auto Iter = B.begin(); Iter != B.end(); ++Iter) {
