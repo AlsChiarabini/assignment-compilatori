@@ -27,7 +27,7 @@ Value* prova_opt_Somma(BinaryOperator *inst) {
 Value* prova_opt_Sub(BinaryOperator *inst) {
     if (inst->getOpcode() == Instruction::Sub) {
         
-        // Verifica se l'operando 2 è zero
+        
         if (ConstantInt *C = dyn_cast<ConstantInt>(inst->getOperand(1))) {
             if (C->isZero()) {    // Caso specifico per "x - 0"
                 return inst->getOperand(0);  // Restituisci il primo operando
