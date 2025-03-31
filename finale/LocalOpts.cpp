@@ -15,10 +15,10 @@ using namespace llvm;
 
 namespace {
 
-// Pass 1 - Basic Arithmetic Optimizations
+// Pass 1 - Algebraic Identity Optimizations
 struct TestPass1 : PassInfoMixin<TestPass1> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    errs() << "Running Pass 1: Basic Arithmetic Optimizations\n";
+    errs() << "Running Pass 1: Algebraic Identity Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
     // Assume passo1.cpp provides this implementation
     passo1::runOnFunction(F);
@@ -34,7 +34,7 @@ struct TestPass2 : PassInfoMixin<TestPass2> {
     errs() << "Running Pass 2: Strength Reduction Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
     // Assume passo2.cpp provides this implementation with namespace or different function name
-    // To avoid name conflicts, you may need to adjust your files
+    
     passo2::runOnFunction(F);
     return PreservedAnalyses::all();
   }
@@ -42,10 +42,10 @@ struct TestPass2 : PassInfoMixin<TestPass2> {
   static bool isRequired() { return true; }
 };
 
-// Pass 3 - Algebraic Identity Optimizations
+// Pass 3 - Multi-instruction optimization
 struct TestPass3 : PassInfoMixin<TestPass3> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    errs() << "Running Pass 3: Algebraic Identity Optimizations\n";
+    errs() << "Running Pass 3: Multi-instruction optimization\n";
     errs() << "Function Name: " << F.getName() << "\n";
     // Assume passo3.cpp provides this implementation with namespace or different function name
     passo3::runOnFunction(F);
