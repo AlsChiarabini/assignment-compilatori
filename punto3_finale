@@ -33,7 +33,7 @@ Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp) {
        (BinOp->getOpcode() == Instruction::Sub && NextBinOp->getOpcode() == Instruction::Add && constVal == constVal2) ||
        (BinOp->getOpcode() == Instruction::Mul && NextBinOp->getOpcode() == Instruction::SDiv && constVal == constVal2 && constVal != 0) ||
        (BinOp->getOpcode() == Instruction::SDiv && NextBinOp->getOpcode() == Instruction::Mul && constVal == constVal2 && constVal != 0)) {
-       	outs() << "Ottimizzazione effettuata: caso regolare\n";
+       	//outs() << "Ottimizzazione effettuata: caso regolare\n";   per debug
        return varOp;
    }
 
@@ -50,7 +50,7 @@ Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp) {
         //verifico che ho una operazione duale alla add / mul
         if ((BinOp->getOpcode() == Instruction::Add && NextBinOp->getOpcode() == Instruction::Sub && constVal == constVal2) ||
                 (BinOp->getOpcode() == Instruction::Mul && NextBinOp->getOpcode() == Instruction::SDiv && constVal == constVal2 && constVal != 0)   ){
-                    outs() << "Ottimizzazione effettuata: caso 'speciale' per add/mul\n";
+                    //outs() << "Ottimizzazione effettuata: caso 'speciale' per add/mul\n";    Per debug
                     return varOp;
                 }
     }
@@ -65,40 +65,41 @@ Value* trova_op_duale(BinaryOperator *BinOp, BinaryOperator *NextBinOp) {
 // - entrambi hanno una costante , la successiva USA la prima e l'operazione è la duale    [per add e mul si considera la commutatività]
 //  es:  se ho  BinOP:   a=b-C   allora è idonea   c=a+C  oppure  c=C+a           ("C" costante) 
 //  il controllo che effettivamente le costanti siano uguali e le operazioni duali  viene lasciato a "trova_op_duali"
-bool controlla_prossime_istruzioni(BinaryOperator *BinOp, BasicBlock::iterator Iter, BasicBlock &BB) {
-   bool modifica = false;
-   Value *X = BinOp->getOperand(0);
-   Value *Y = BinOp->getOperand(1);
+bool controlla_prossime_istruzioni(BinaryOperator *BinOp) {
+    bool modifica = false;
+    Value *X = BinOp->getOperand(0);
+    Value *Y = BinOp->getOperand(1);
 
-
-
-
-   if (dyn_cast<ConstantInt>(Y) || ((BinOp->getOpcode() == Instruction::Add || BinOp->getOpcode() == Instruction::Mul) && dyn_cast<ConstantInt>(X))) {
-       std::vector<Instruction*> to_erase;
-       for (auto NextIter = std::next(Iter); NextIter != BB.end(); ++NextIter) {
-           Instruction *NextInst = &*NextIter;
-           if (auto *NextBinOp = dyn_cast<BinaryOperator>(NextInst)) {
-               Value *A = NextBinOp->getOperand(0);
-               Value *B = NextBinOp->getOperand(1);
-               if (A == BinOp || ((NextBinOp->getOpcode() == Instruction::Add || NextBinOp->getOpcode() == Instruction::Mul) && B == BinOp)) {
-                    outs() << "cerco op duale\n";
-                   Value *replacement = trova_op_duale(BinOp, NextBinOp);
-                   if (replacement) {
-                   	
-                       NextBinOp->replaceAllUsesWith(replacement);
-                       to_erase.push_back(NextBinOp);
-                       modifica = true;
-                   }
-               }
-           }
-       }
-       for (auto *Inst : to_erase) {
-           Inst->eraseFromParent();
-       }
-   }
-   return modifica;
+    if (dyn_cast<ConstantInt>(Y) || 
+        ((BinOp->getOpcode() == Instruction::Add || BinOp->getOpcode() == Instruction::Mul) && dyn_cast<ConstantInt>(X))) {
+        
+        std::vector<Instruction*> to_erase;
+        
+        for (User *U : BinOp->users()) {
+            if (Instruction *NextInst = dyn_cast<Instruction>(U)) {
+                if (auto *NextBinOp = dyn_cast<BinaryOperator>(NextInst)) {
+                    Value *A = NextBinOp->getOperand(0);
+                    Value *B = NextBinOp->getOperand(1);
+                    
+                    if (A == BinOp || ((NextBinOp->getOpcode() == Instruction::Add || NextBinOp->getOpcode() == Instruction::Mul) && B == BinOp)) {
+                        Value *replacement = trova_op_duale(BinOp, NextBinOp);
+                        if (replacement) {
+                            NextBinOp->replaceAllUsesWith(replacement);
+                            to_erase.push_back(NextBinOp);
+                            modifica = true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (auto *Inst : to_erase) {
+            Inst->eraseFromParent();
+        }
+    }
+    
+    return modifica;
 }
-
 
 
 //per ogni istruzione binaria cerca tra le prossime istruzioni una potenziale istruzione "duale"  
@@ -106,7 +107,7 @@ bool runOnBasicBlock(BasicBlock &B) {
    bool modifica = false;
    for (auto Iter = B.begin(); Iter != B.end(); ++Iter) {
        if (auto *BinOp = dyn_cast<BinaryOperator>(&*Iter)) {
-           if (controlla_prossime_istruzioni(BinOp, Iter, B))
+           if (controlla_prossime_istruzioni(BinOp))
                modifica = true;
        }
    }
