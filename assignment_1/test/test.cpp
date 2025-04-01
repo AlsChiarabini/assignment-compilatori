@@ -18,32 +18,44 @@ int test_passo2(int x) {
     int r1 = x * 16;        // Convertibile in: x << 4
     int r2 = x * 15;        // Convertibile in: (x << 4) - x
     int r3 = x * 17;        // Convertibile in: (x << 4) + x
+    int r7 = 17 * x;        // Convertibile in: x * 17
+    int r8 = 16 * x;        // Convertibile in: x << 4
+    int r9 = 15 * x;        // Convertibile in: (x << 4) - x
     int r4 = x / 8;         // Convertibile in: x >> 3
     int r5 = x * (-16);     // Convertibile in: 0 - (x << 4)
+    int r10 = (-16) * x;    // Convertibile in: 0 - (x << 4)
     int r6 = x / (-8);      // Convertibile in: 0 - (x >> 3)
     
-    return r1 + r2 + r3 + r4 + r5 + r6;
+    return r1 + r2 + r3 + r4 + r5 + r6 + r7 + r8 + r9 + r10;
 }
 
 // Questa funzione contiene casi per il passo 3 (operazioni duali)
 int test_passo3(int x) {
     int a1 = x + 5;
     int b1 = a1 - 5;       // Eliminabile: Operazione duale di a1, risultato = x
+
+    int a6 = 5 + x;
+    int b6 = a6 - 5;       // Eliminabile: Operazione duale di a6, risultato = x
     
     int a2 = x - 7;
     int b2 = a2 + 7;       // Eliminabile: Operazione duale di a2, risultato = x
+    int b2_2 = 7 + a2;      // Eliminabile: Operazione duale di a2, risultato = x
     
     int a3 = x * 3;
     int b3 = a3 / 3;       // Eliminabile: Operazione duale di a3, risultato = x
+
+    int a7 = 3 * x;
+    int b7 = a7 / 3;       // Eliminabile: Operazione duale di a7, risultato = x
     
     int a4 = x / 4;
     int b4 = a4 * 4;       // Eliminabile: Operazione duale di a4, risultato = x
+    int b4_2 = 4 * a4;      // Eliminabile: Operazione duale di a4, risultato = x
     
     // Caso speciale con due costanti
     int a5 = 3 * 5;
     int b5 = a5 / 3;       // Eliminabile: risultato = 5
     
-    return b1 + b2 + b3 + b4 + b5;
+    return b1 + b2 + b3 + b4 + b5 + b6 + b7 + b2_2 + b4_2;
 }
 
 // Testa tutti e tre i passi insieme con casi più complessi
