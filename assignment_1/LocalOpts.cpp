@@ -18,7 +18,7 @@ namespace {
 // Pass 1 - Basic Arithmetic Optimizations
 struct TestPass1 : PassInfoMixin<TestPass1> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    errs() << "Running Pass 1: Basic Arithmetic Optimizations\n";
+    errs() << "Running Pass 1: Algebrai identity Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
     // Assume passo1.cpp provides this implementation
     passo1::runOnFunction(F);
@@ -45,7 +45,7 @@ struct TestPass2 : PassInfoMixin<TestPass2> {
 // Pass 3 - Algebraic Identity Optimizations
 struct TestPass3 : PassInfoMixin<TestPass3> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    errs() << "Running Pass 3: Algebraic Identity Optimizations\n";
+    errs() << "Running Pass 3: Multi instruction Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
     // Assume passo3.cpp provides this implementation with namespace or different function name
     passo3::runOnFunction(F);
