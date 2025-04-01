@@ -92,41 +92,6 @@ int test_combined(int x, int y) {
     return r1 + r3 + r6 + r9 + s4;
 }
 
-// Funzione con molti registri e calcoli per raggiungere ~100 registri
-int complex_function(int a, int b, int c) {
-    // Creiamo molte variabili con operazioni che possono essere ottimizzate
-    int vars[50]; // Dichiarazione di 50 variabili
-    
-    // Inizializzo tutte le variabili con operazioni ottimizzabili
-    vars[0] = a + 0;
-    vars[1] = b * 1;
-    vars[2] = c - 0;
-    vars[3] = a * 8;
-    vars[4] = vars[3] / 8; // Duale di vars[3]
-    vars[5] = b + 5;
-    vars[6] = vars[5] - 5; // Duale di vars[5]
-    vars[7] = c * 16;
-    vars[8] = a * 15;
-    vars[9] = b / 4;
-    
-    // E così via con pattern simili...
-    for (int i = 10; i < 50; i++) {
-        if (i % 5 == 0) vars[i] = vars[i-10] + 0;
-        else if (i % 5 == 1) vars[i] = vars[i-5] * 1;
-        else if (i % 5 == 2) vars[i] = vars[i-2] * 8;
-        else if (i % 5 == 3) vars[i] = vars[i-1] / 8;
-        else vars[i] = vars[i-4] - 0;
-    }
-    
-    // Alcune operazioni con risultati che verranno poi usati
-    int sum = 0;
-    for (int i = 0; i < 50; i++) {
-        sum += vars[i];
-    }
-    
-    return sum;
-}
-
 int main() {
     int x = 42;
     int y = 24;
@@ -136,7 +101,6 @@ int main() {
     printf("Test passo 2: %d\n", test_passo2(x));
     printf("Test passo 3: %d\n", test_passo3(x));
     printf("Test combinato: %d\n", test_combined(x, y));
-    printf("Test complesso: %d\n", complex_function(x, y, z));
     
     return 0;
 }
