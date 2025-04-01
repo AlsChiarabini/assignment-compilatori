@@ -50,12 +50,18 @@ int test_passo3(int x) {
     int a4 = x / 4;
     int b4 = a4 * 4;       // Eliminabile: Operazione duale di a4, risultato = x
     int b4_2 = 4 * a4;      // Eliminabile: Operazione duale di a4, risultato = x
+
+    int a8 = x >> 2;
+    int b8 = a8 << 2;      // Eliminabile: Operazione duale di a8, risultato = x
+
+    int a9 = x << 2;
+    int b9 = a9 >> 2;      // Eliminabile: Operazione duale di a9, risultato = x
     
     // Caso speciale con due costanti
     int a5 = 3 * 5;
     int b5 = a5 / 3;       // Eliminabile: risultato = 5
     
-    return b1 + b2 + b3 + b4 + b5 + b6 + b7 + b2_2 + b4_2;
+    return b1 + b2 + b3 + b4 + b5 + b6 + b7 + b2_2 + b4_2 + b8 + b9;
 }
 
 // Testa tutti e tre i passi insieme con casi più complessi
