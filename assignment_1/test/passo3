@@ -37,7 +37,6 @@ namespace passo3 {
         }
     
         // Verifica se le operazioni sono duali e restituisce la variabile per il replace
-        // Verifica se le operazioni sono duali e restituisce la variabile per il replace
         if ((BinOp->getOpcode() == Instruction::Add && NextBinOp->getOpcode() == Instruction::Sub && constVal == constVal2) ||
             (BinOp->getOpcode() == Instruction::Sub && NextBinOp->getOpcode() == Instruction::Add && constVal == constVal2) ||
             (BinOp->getOpcode() == Instruction::Mul && NextBinOp->getOpcode() == Instruction::SDiv && constVal == constVal2 && constVal != 0) ||

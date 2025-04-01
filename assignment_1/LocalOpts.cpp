@@ -6,7 +6,7 @@
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Instructions.h"
 
-// Include your implementations (assuming they're properly organized)
+// Include your implementations 
 #include "./test/passo1"
 #include "./test/passo2"
 #include "./test/passo3"
@@ -18,9 +18,8 @@ namespace {
 // Pass 1 - Basic Arithmetic Optimizations
 struct TestPass1 : PassInfoMixin<TestPass1> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
-    errs() << "Running Pass 1: Algebrai identity Optimizations\n";
+    errs() << "Running Pass 1: Algebric identity Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
-    // Assume passo1.cpp provides this implementation
     passo1::runOnFunction(F);
     return PreservedAnalyses::all();
   }
@@ -33,8 +32,6 @@ struct TestPass2 : PassInfoMixin<TestPass2> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
     errs() << "Running Pass 2: Strength Reduction Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
-    // Assume passo2.cpp provides this implementation with namespace or different function name
-    // To avoid name conflicts, you may need to adjust your files
     passo2::runOnFunction(F);
     return PreservedAnalyses::all();
   }
@@ -42,12 +39,11 @@ struct TestPass2 : PassInfoMixin<TestPass2> {
   static bool isRequired() { return true; }
 };
 
-// Pass 3 - Algebraic Identity Optimizations
+// Pass 3 - Multi-instruction Optimizations
 struct TestPass3 : PassInfoMixin<TestPass3> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
     errs() << "Running Pass 3: Multi instruction Optimizations\n";
     errs() << "Function Name: " << F.getName() << "\n";
-    // Assume passo3.cpp provides this implementation with namespace or different function name
     passo3::runOnFunction(F);
     return PreservedAnalyses::all();
   }
@@ -55,7 +51,6 @@ struct TestPass3 : PassInfoMixin<TestPass3> {
   static bool isRequired() { return true; }
 };
 
-// Combined Pass - Run all optimizations
 struct TestPassAll : PassInfoMixin<TestPassAll> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &) {
     errs() << "Running All Optimization Passes\n";
@@ -63,7 +58,6 @@ struct TestPassAll : PassInfoMixin<TestPassAll> {
     
     bool changed = false;
     
-    // Run all passes in sequence
     changed |= passo1::runOnFunction(F); // Pass 1
     changed |= passo2::runOnFunction(F); // Pass 2
     changed |= passo3::runOnFunction(F); // Pass 3

@@ -93,7 +93,7 @@ namespace passo2 {
         for (auto Iter = B.begin(); Iter != B.end(); ) {
             Instruction &Inst = *Iter++;
             if (BinaryOperator *BinOP = dyn_cast<BinaryOperator>(&Inst)) {
-                changed = optimizeMul(BinOP) || optimizeDiv(BinOP);        //sfruttiamo il corto cicuito
+                changed = optimizeMul(BinOP) || optimizeDiv(BinOP);        //sfruttiamo il corto circuito
             }
         }
         return modifica;
