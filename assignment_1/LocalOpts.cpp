@@ -7,9 +7,9 @@
 #include "llvm/IR/Instructions.h"
 
 // Include your implementations 
-#include "./test/passo1"
-#include "./test/passo2"
-#include "./test/passo3"
+#include "passo1.cpp"
+#include "passo2.cpp"
+#include "passo3.cpp"
 
 using namespace llvm;
 
