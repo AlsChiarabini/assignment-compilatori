@@ -26,7 +26,9 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     } else {
   	errs() << "Function " << F.getName() << " does NOT contain any loops.\n";
     }
-
+	
+	// per ogni loop:  lancia le 3 fasi
+	errs() << "TODO\n";
     
 
     return PreservedAnalyses::all();
