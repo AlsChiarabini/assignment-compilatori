@@ -1,8 +1,8 @@
 file(REMOVE_RECURSE
   "CMakeFiles/TestPass.dir/LocalOpts.cpp.o"
   "CMakeFiles/TestPass.dir/LocalOpts.cpp.o.d"
+  "libTestPass.dylib"
   "libTestPass.pdb"
-  "libTestPass.so"
 )
 
 # Per-language clean rules from dependency scanning.
