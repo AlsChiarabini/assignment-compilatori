@@ -1,27 +1,27 @@
-int main()
-{
-	int a = 5;
-	
-	if (a > 0){
-        //Blocco C
+int main() {
+    int a = 5;
+    int b = 10;
+    int c = 3;
+
+    if (a > 0){
         a = a + 1;
         if (a > 3){
-            // blocco D
             a = 10;
-        }else{
-            // blocco E
+        } else {
             a = 11;
         }
-        // blocco f
         a = a / 2;  
     } else {
-        // blocco B
         a = a * (-1);
     }
 
-    //blocco G
-    a = a * a;
-	
-	return a;  
-}
+    int res = 0;
+    for (int i = 0; i < 5; i++) {
+        int d = b + c; // <-- b e c sono costanti esterni → `d = b + c` è loop-invariant!
+        res += d;
+    }
 
+    a = a * a;
+    
+    return a;
+}
