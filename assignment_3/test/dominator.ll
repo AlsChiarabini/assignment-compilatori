@@ -32,24 +32,40 @@ define noundef i32 @main() #0 {
   %.1 = phi i32 [ %8, %7 ], [ %10, %9 ]
   br label %12
 
-12:                                               ; preds = %17, %11
-  %.02 = phi i32 [ 0, %11 ], [ %16, %17 ]
-  %.0 = phi i32 [ 0, %11 ], [ %18, %17 ]
-  %13 = icmp slt i32 %.0, 5
-  br i1 %13, label %14, label %19
+12:                                               ; preds = %24, %11
+  %.02 = phi i32 [ 0, %11 ], [ %25, %24 ]
+  %13 = icmp slt i32 %.02, 5
+  br i1 %13, label %14, label %26
 
 14:                                               ; preds = %12
   %15 = add nsw i32 10, 3
-  %16 = add nsw i32 %.02, %15
+  %16 = add nsw i32 %15, 7
   br label %17
 
-17:                                               ; preds = %14
-  %18 = add nsw i32 %.0, 1
-  br label %12, !llvm.loop !6
+17:                                               ; preds = %21, %14
+  %.03 = phi i32 [ %16, %14 ], [ %20, %21 ]
+  %.0 = phi i32 [ 0, %14 ], [ %22, %21 ]
+  %18 = icmp slt i32 %.0, 3
+  br i1 %18, label %19, label %23
 
-19:                                               ; preds = %12
-  %20 = mul nsw i32 %.1, %.1
-  ret i32 %20
+19:                                               ; preds = %17
+  %20 = add nsw i32 %.03, %.1
+  br label %21
+
+21:                                               ; preds = %19
+  %22 = add nsw i32 %.0, 1
+  br label %17, !llvm.loop !6
+
+23:                                               ; preds = %17
+  br label %24
+
+24:                                               ; preds = %23
+  %25 = add nsw i32 %.02, 1
+  br label %12, !llvm.loop !8
+
+26:                                               ; preds = %12
+  %27 = mul nsw i32 %.1, %.1
+  ret i32 %27
 }
 
 attributes #0 = { mustprogress noinline norecurse nounwind ssp uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cmov,+cx16,+cx8,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "tune-cpu"="generic" }
@@ -65,3 +81,4 @@ attributes #0 = { mustprogress noinline norecurse nounwind ssp uwtable "frame-po
 !5 = !{!"Homebrew clang version 20.1.3"}
 !6 = distinct !{!6, !7}
 !7 = !{!"llvm.loop.mustprogress"}
+!8 = distinct !{!8, !7}

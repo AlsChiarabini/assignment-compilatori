@@ -18,7 +18,10 @@ int main() {
     int res = 0;
     for (int i = 0; i < 5; i++) {
         int d = b + c; // <-- b e c sono costanti esterni → `d = b + c` è loop-invariant!
-        res += d;
+        res += d;     // Provato anche res = d+7 --> segna loop invariant, ok
+        for (int j = 0; j < 3; j++) {
+            res += a;
+        }
     }
 
     a = a * a;
