@@ -15,7 +15,7 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     if (F.isDeclaration())
       return PreservedAnalyses::all();
 
-    errs() << "Running FunctionPass on: " << F.getName() << "\n";
+    //errs() << "Running FunctionPass on: " << F.getName() << "\n";
 
     // Ottieni l'analisi LoopInfo
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
@@ -27,8 +27,12 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
   	errs() << "Function " << F.getName() << " does NOT contain any loops.\n";
     }
 	
-	// per ogni loop:  lancia le 3 fasi
-	errs() << "TODO\n";
+   // per ogni loop:  lancia le 3 fasi
+   for (Loop *L : LI) {
+        fase1(L);
+        fase2(L);
+        fase3(L);
+    }
     
 
     return PreservedAnalyses::all();
