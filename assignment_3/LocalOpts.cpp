@@ -31,7 +31,7 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
 	
    // per ogni loop:  lancia le 3 fasi
    for (Loop *L : LI) {
-        fase1(L);
+        std::vector<Instruction*> InvariantInsts = fase1(L);
         //fase2(L);
         //fase3(L);
     }

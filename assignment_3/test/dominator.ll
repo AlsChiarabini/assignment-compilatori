@@ -5,67 +5,39 @@ target triple = "x86_64-apple-macosx15.0.0"
 
 ; Function Attrs: mustprogress noinline norecurse nounwind ssp uwtable
 define noundef i32 @main() #0 {
-  %1 = icmp sgt i32 5, 0
-  br i1 %1, label %2, label %9
+  %1 = mul nsw i32 2, 1
+  br label %2
 
-2:                                                ; preds = %0
-  %3 = add nsw i32 5, 1
-  %4 = icmp sgt i32 %3, 3
-  br i1 %4, label %5, label %6
+2:                                                ; preds = %13, %0
+  %.02 = phi i32 [ undef, %0 ], [ %12, %13 ]
+  %.01 = phi i32 [ 0, %0 ], [ %14, %13 ]
+  %3 = icmp slt i32 %.01, 10
+  br i1 %3, label %4, label %15
 
-5:                                                ; preds = %2
-  br label %7
+4:                                                ; preds = %2
+  %5 = mul nsw i32 2, 1
+  %6 = icmp sgt i32 %5, 0
+  br i1 %6, label %7, label %9
 
-6:                                                ; preds = %2
-  br label %7
-
-7:                                                ; preds = %6, %5
-  %.01 = phi i32 [ 10, %5 ], [ 11, %6 ]
-  %8 = sdiv i32 %.01, 2
+7:                                                ; preds = %4
+  %8 = mul nsw i32 2, 2
   br label %11
 
-9:                                                ; preds = %0
-  %10 = mul nsw i32 5, -1
+9:                                                ; preds = %4
+  %10 = mul nsw i32 1, 3
   br label %11
 
 11:                                               ; preds = %9, %7
-  %.1 = phi i32 [ %8, %7 ], [ %10, %9 ]
-  br label %12
+  %.0 = phi i32 [ %8, %7 ], [ %10, %9 ]
+  %12 = add nsw i32 %.0, 1
+  br label %13
 
-12:                                               ; preds = %24, %11
-  %.02 = phi i32 [ 0, %11 ], [ %25, %24 ]
-  %13 = icmp slt i32 %.02, 5
-  br i1 %13, label %14, label %26
+13:                                               ; preds = %11
+  %14 = add nsw i32 %.01, 1
+  br label %2, !llvm.loop !6
 
-14:                                               ; preds = %12
-  %15 = add nsw i32 10, 3
-  %16 = add nsw i32 %15, 7
-  br label %17
-
-17:                                               ; preds = %21, %14
-  %.03 = phi i32 [ %16, %14 ], [ %20, %21 ]
-  %.0 = phi i32 [ 0, %14 ], [ %22, %21 ]
-  %18 = icmp slt i32 %.0, 3
-  br i1 %18, label %19, label %23
-
-19:                                               ; preds = %17
-  %20 = add nsw i32 %.03, %.1
-  br label %21
-
-21:                                               ; preds = %19
-  %22 = add nsw i32 %.0, 1
-  br label %17, !llvm.loop !6
-
-23:                                               ; preds = %17
-  br label %24
-
-24:                                               ; preds = %23
-  %25 = add nsw i32 %.02, 1
-  br label %12, !llvm.loop !8
-
-26:                                               ; preds = %12
-  %27 = mul nsw i32 %.1, %.1
-  ret i32 %27
+15:                                               ; preds = %2
+  ret i32 %.02
 }
 
 attributes #0 = { mustprogress noinline norecurse nounwind ssp uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cmov,+cx16,+cx8,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "tune-cpu"="generic" }
@@ -81,4 +53,3 @@ attributes #0 = { mustprogress noinline norecurse nounwind ssp uwtable "frame-po
 !5 = !{!"Homebrew clang version 20.1.3"}
 !6 = distinct !{!6, !7}
 !7 = !{!"llvm.loop.mustprogress"}
-!8 = distinct !{!8, !7}
