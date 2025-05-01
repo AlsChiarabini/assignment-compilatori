@@ -14,6 +14,22 @@ using namespace llvm;
 
 namespace{
 
+
+//se anche uno solo spostamento nel passo è avvenuto la funziona ritorna true
+bool LICM(LoopInfo &LI) {
+    bool changed = false;
+     for (Loop *L : LI) {
+	    std::vector<Instruction*> InvariantInsts = fase1(L);
+	    
+	    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
+	    	
+            if (fase3(L, InstsForCodeMotion))
+        	changed = true;
+    }
+    return changed;
+}
+
+
 struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
   PreservedAnalyses run(Function &F, FunctionAnalysisManager &AM) {
     if (F.isDeclaration())
@@ -23,17 +39,12 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
    bool changed = true;
-   // per ogni loop:  lancia le 3 fasi
    
+   //lancio la LICM fino a convergenza
    for ( ; changed ; ){
    	    changed = false;
-   	    //questo wrappa in fun "LICM"
-	   for (Loop *L : LI) {
-	    std::vector<Instruction*> InvariantInsts = fase1(L);
-	    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
-	    if (fase3(L, InstsForCodeMotion))
-	    	changed = true;   	
-	    }	   
+   	    if (LICM(LI))
+   	    	changed = true;	   
     }
     
 	//questo va logicamente bene?
