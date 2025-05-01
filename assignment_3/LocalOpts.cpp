@@ -13,7 +13,7 @@
 using namespace llvm;
 
 namespace{
-
+	// implementare changed
   void visitaLoop(Loop *L) {
     std::vector<Instruction*> InvariantInsts = fase1(L);
     std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
@@ -24,7 +24,7 @@ namespace{
     }
 }
 
-//se anche uno solo spostamento nel passo è avvenuto la funziona ritorna true
+// TODO: sistema questione changed
 bool LICM(LoopInfo &LI) {
   bool changed = false;
   for (Loop *L : LI) {
