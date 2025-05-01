@@ -14,19 +14,24 @@ using namespace llvm;
 
 namespace{
 
+  void visitaLoop(Loop *L) {
+    std::vector<Instruction*> InvariantInsts = fase1(L);
+    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
+    fase3(L, InstsForCodeMotion);
+
+    for (Loop *SubL : L->getSubLoops()) {
+        visitaLoop(SubL);
+    }
+}
 
 //se anche uno solo spostamento nel passo è avvenuto la funziona ritorna true
 bool LICM(LoopInfo &LI) {
-    bool changed = false;
-     for (Loop *L : LI) {
-	    std::vector<Instruction*> InvariantInsts = fase1(L);
-	    
-	    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
-	    	
-      if (fase3(L, InstsForCodeMotion))
-        changed = true;
-    }
-    return changed;
+  bool changed = false;
+  for (Loop *L : LI) {
+      visitaLoop(L);
+      changed = true; // se fai ottimizzazione vera, puoi gestire questo in modo preciso
+  }
+  return changed;
 }
 
 
