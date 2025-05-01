@@ -9,10 +9,47 @@
 
 using namespace llvm;
 
-void fase3(Loop *L, std::vector<Istruction*> InstsForCodeMotion) {
+bool instr1ComesBeforeinstr2(Instruction *a, Instruction *b) {
+    BasicBlock *blockA = a->getParent();
+    BasicBlock *blockB = b->getParent();
 
-    BasicBlock *preheader = L->getLoopPreHeader();
-    if (!preheader) {
-        errs() << "[FASE 3] --> Nessun preheader trovato, loop non in forma normale, impossibile farecode motion"
+    // Le istruzioni sono nello stesso blocco
+    if (blockA == blockB) {
+        return b->comesBefore(a); // metodo LLVM, risponde a 'b compare fisicamente prima di a?'
     }
+
+    //Le istruzioni sono in blocchi diversi
+    Function *F = blockA->getParent();
+    for (BasicBlock &BB : *F) {
+        if (&BB == blockA) return false; // --> A compare prima di B, quindi nessun problema
+        if (&BB == blockB) return true; // --> B compare prima di A, quindi ordiniamo
+    }
+
+    errs() << "Qua non devo mai arrivarci, ERRORE (per debugggg)"; return false;
+
+}
+
+void muoviInstr(Instruction *inst, BasicBlock *preheader) {
+    inst->removeFromParent();
+    inst->insertBefore(preheader->getTerminator()); // prendo punto finale e le metto prima di quello
+    errs() << "Ho spostato l'istruzione (";
+    inst->print(errs());
+    errs() << ") nel preheader\n";
+}
+
+void fase3(Loop *L, std::vector<Instruction*> InstsForCodeMotion) {
+
+    BasicBlock *preheader = L->getLoopPreheader();
+    if (!preheader) {
+        errs() << "Nessun preheader trovato, loop non in forma normale, impossibile farecode motion";
+        return;
+    }
+
+    std::stable_sort(InstsForCodeMotion.begin(), InstsForCodeMotion.end(), instr1ComesBeforeinstr2); 
+    
+    // output --> vettore ordinato, non mi resta che muovere
+    for (Instruction *inst : InstsForCodeMotion) {
+        muoviInstr(inst, preheader);
+    }
+
 }
