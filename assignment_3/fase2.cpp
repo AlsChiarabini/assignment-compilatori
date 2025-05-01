@@ -38,11 +38,15 @@ bool dominates_allExit(Instruction *inst, Loop *loop, DominatorTree &DT) {
 }
 
 bool dead_afterLoop(Instruction *inst, Loop *loop) {
-    // Implementa la logica per determinare se l'istruzione è morta dopo il loop
-    // Ad esempio, controllando se l'istruzione non viene più utilizzata dopo il loop
-    // Puoi utilizzare l'analisi di uso-definizione per questo scopo
-    return false;
+    for (User *U : inst->users()) {
+        if (Instruction *useInst = dyn_cast<Instruction>(U)) {
+            if (!loop->contains(useInst))
+                return false;
+        }
+    }
+    return true;
 }
+
 
 
 
