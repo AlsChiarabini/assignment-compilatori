@@ -2,9 +2,28 @@ int main () {
     int a = 2;
     int b = 1;
     int var;
+    int var2;
 
     int c = a*b;
+    int i = 0;
 
+    do {
+        var = a*b;
+        var2 = var*3;
+
+        i++;
+    } while (i < 10); 
+
+}
+
+
+
+
+
+
+
+
+/*
     for (int i = 0; i < 10; i++) {
         int num = 0;
         if (a*b > 0) {
@@ -18,7 +37,7 @@ int main () {
     return var;
 }
 
-/*
+
 int main() {
     int a = 5;
     int b = 10;

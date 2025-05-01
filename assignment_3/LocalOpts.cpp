@@ -6,7 +6,9 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/Dominators.h"
 
-#include "myLICM.cpp"
+#include "fase1.cpp"
+#include "fase2.cpp"    
+#include "fase3.cpp"
 
 using namespace llvm;
 
@@ -31,10 +33,10 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
 	
    // per ogni loop:  lancia le 3 fasi
    for (Loop *L : LI) {
-        std::vector<Instruction*> InvariantInsts = fase1(L);
-        //fase2(L);
-        //fase3(L);
-    }
+    std::vector<Instruction*> InvariantInsts = fase1(L);
+    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
+    fase3(L, InstsForCodeMotion);
+}
     
 
     return PreservedAnalyses::all();
