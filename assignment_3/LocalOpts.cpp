@@ -19,26 +19,24 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     if (F.isDeclaration())
       return PreservedAnalyses::all();
 
-    //errs() << "Running FunctionPass on: " << F.getName() << "\n";
-
     // Ottieni l'analisi LoopInfo
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
-    //Per sapere se la funzione/CFG abbia almeno un loop: 
-    if (!LI.empty()) {
-  	errs() << "Function " << F.getName() << " contains at least one loop.\n";
-    } else {
-  	errs() << "Function " << F.getName() << " does NOT contain any loops.\n";
-    }
-	
+   bool changed = true;
    // per ogni loop:  lancia le 3 fasi
-   for (Loop *L : LI) {
-    std::vector<Instruction*> InvariantInsts = fase1(L);
-    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
-    fase3(L, InstsForCodeMotion);
-}
+   
+   for ( ; changed ; ){
+   	    changed = false;
+   	    //questo wrappa in fun "LICM"
+	   for (Loop *L : LI) {
+	    std::vector<Instruction*> InvariantInsts = fase1(L);
+	    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
+	    if (fase3(L, InstsForCodeMotion))
+	    	changed = true;   	
+	    }	   
+    }
     
-
+	//questo va logicamente bene?
     return PreservedAnalyses::all();
   }
 
