@@ -71,9 +71,9 @@ std::vector<Instruction*> fase2(Loop *L, const std::vector<Instruction*> &Invari
         }
     }
 
-    errs() << "Totale istruzioni code-motion trovate: " << InstsForCodeMotion.size() << "\n";
+    errs() << "[FASE 2] Totale istruzioni code-motion trovate: " << InstsForCodeMotion.size() << "\n";
     for (Instruction *inst : InstsForCodeMotion) {
-        errs() << "Istruzione per code motion: ";
+        errs() << "[FASE 2] Istruzione per code motion: ";
         inst->print(errs());
         errs() << "\n";
     }

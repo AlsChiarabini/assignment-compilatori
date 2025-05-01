@@ -23,8 +23,8 @@ bool LICM(LoopInfo &LI) {
 	    
 	    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
 	    	
-            if (fase3(L, InstsForCodeMotion))
-        	changed = true;
+      if (fase3(L, InstsForCodeMotion))
+        changed = true;
     }
     return changed;
 }
@@ -38,14 +38,7 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     // Ottieni l'analisi LoopInfo
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
-   bool changed = true;
-   
-   //lancio la LICM fino a convergenza
-   for ( ; changed ; ){
-   	    changed = false;
-   	    if (LICM(LI))
-   	    	changed = true;	   
-    }
+    bool changed = LICM(LI); // Da togliere bool a questo punto
     
 	//questo va logicamente bene?
     return PreservedAnalyses::all();

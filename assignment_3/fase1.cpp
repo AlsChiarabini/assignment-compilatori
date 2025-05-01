@@ -21,7 +21,7 @@ bool isInstructionInvariant (Instruction &I, Loop *L) {
 
         if (isOperandInvariant(op1, L) && isOperandInvariant(op2, L)) { // entrambi gli operandi sono loop-invariant rispetto al loop
             loopInvariantInsts.push_back(binOp);
-            errs() << "Trovata loop-invariant: ";
+            errs() << "[FASE 1] Trovata loop-invariant: ";
             binOp->print(errs());
             errs() << "\n";
             return true;
@@ -61,7 +61,7 @@ std::vector<Instruction*> fase1(Loop *L) {
             isInstructionInvariant(I,L);
         }
     }
-    errs() << "Totale istruzioni loop-invariant trovate: " << loopInvariantInsts.size() << "\n";
+    errs() << "[FASE 1] Totale istruzioni loop-invariant trovate: " << loopInvariantInsts.size() << "\n";
     return loopInvariantInsts;
 }
 

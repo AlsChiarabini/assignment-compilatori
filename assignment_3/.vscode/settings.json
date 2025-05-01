@@ -14,6 +14,10 @@
         "__split_buffer": "cpp",
         "__tree": "cpp",
         "set": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "bitset": "cpp",
+        "queue": "cpp",
+        "stack": "cpp",
+        "print": "cpp"
     }
 }
