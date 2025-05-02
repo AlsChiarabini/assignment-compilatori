@@ -14,22 +14,26 @@ using namespace llvm;
 
 namespace{
 	// implementare changed
-  void visitaLoop(Loop *L) {
+  bool visitaLoop(Loop *L) {
+    bool IR_changed = false;
     std::vector<Instruction*> InvariantInsts = fase1(L);
     std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
-    fase3(L, InstsForCodeMotion);
+    if (fase3(L, InstsForCodeMotion))
+        IR_changed = true;
 
     for (Loop *SubL : L->getSubLoops()) {
-        visitaLoop(SubL);
+        if (visitaLoop(SubL))
+            IR_changed = true;
     }
+    return IR_changed;
 }
 
 // TODO: sistema questione changed
 bool LICM(LoopInfo &LI) {
   bool changed = false;
   for (Loop *L : LI) {
-      visitaLoop(L);
-      changed = true; // se fai ottimizzazione vera, puoi gestire questo in modo preciso
+      if (visitaLoop(L))
+        changed = true; // se fai ottimizzazione vera, puoi gestire questo in modo preciso
   }
   return changed;
 }
@@ -44,9 +48,11 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
     bool changed = LICM(LI); // Da togliere bool a questo punto
-    
-	//questo va logicamente bene?
-    return PreservedAnalyses::all();
+
+    if (changed)
+      errs() << "IR cambiata\n";  
+  
+    return changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
   }
 
   static bool isRequired() { return true; }
