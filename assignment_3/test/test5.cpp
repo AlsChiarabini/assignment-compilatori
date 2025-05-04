@@ -11,9 +11,8 @@ int main () {
         } else {
             num = b*3;			//loop inv
         }
-        var = num + b;			//ancora loop inv + dead
+        var = num + i;			//NON loop inv
     }
-    // TEST NON SUPERATO:  perchè nell'ultima istruzione "num" è una PHINODE INVARIANT! --> cosa che non stiamo considerando ==> chiedi al prof se da implementare
 
     return 0;
 }

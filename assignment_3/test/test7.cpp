@@ -5,11 +5,11 @@ int main () {
 	
    for (int i = 0; i < 10; i++) {
     	for (int j = 0; j < 10 ; j++){
-    		int var = a * b;
+    		int var = a * b;      //loop inv per entrambi i cicli
     	}
        
     }
-  // qui invece deve andare al preader del ciclo esterno!
+  
 
     return 0;
 }

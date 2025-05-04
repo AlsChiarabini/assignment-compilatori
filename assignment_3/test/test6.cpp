@@ -5,11 +5,10 @@ int main () {
 	
    for (int i = 0; i < 10; i++) {
     	for (int j = 0; j < 10 ; j++){
-    		int var = a * i;
+    		int var = a * i;          //loop inv solo del ciclo interno
     	}
        
     }
-  //qui ci basta che l'istruzioni val al pre-header del primo ciclo
 
     return 0;
 }
