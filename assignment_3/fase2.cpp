@@ -9,6 +9,7 @@
 
 using namespace llvm;
 
+//crea ricorsivamente l'insieme tramite dfs
 void dfs(DominatorTree &DT, BasicBlock *BB, std::set<BasicBlock*> &DominatedSet) {
     DominatedSet.insert(BB);
     DomTreeNode *Node = DT.getNode(BB);
@@ -37,6 +38,7 @@ bool dominates_allExit(Instruction *inst, Loop *loop, DominatorTree &DT) {
     return true;
 }
 
+// dead se gli usi sono tutti contenuti nel loop stesso
 bool dead_afterLoop(Instruction *inst, Loop *loop) {
     for (User *U : inst->users()) {
         if (Instruction *useInst = dyn_cast<Instruction>(U)) {
@@ -55,7 +57,6 @@ bool condition_for_codemotion(Instruction *inst, Loop *loop, DominatorTree &DT) 
     return dominates_allExit(inst, loop, DT) || dead_afterLoop(inst, loop);
 }
 
-// ⇒ questa roba la mettiamo su un altro file:    “fase2”
 std::vector<Instruction*> fase2(Loop *L, const std::vector<Instruction*> &InvariantInsts) {
     std::vector<Instruction*> InstsForCodeMotion;
 

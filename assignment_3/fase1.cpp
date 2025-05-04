@@ -19,7 +19,7 @@ bool isInstructionInvariant (Instruction &I, Loop *L) {
         Value *op1 = binOp->getOperand(0);
         Value *op2 = binOp->getOperand(1);
 
-        if (isOperandInvariant(op1, L) && isOperandInvariant(op2, L)) { // entrambi gli operandi sono loop-invariant rispetto al loop
+        if (isOperandInvariant(op1, L) && isOperandInvariant(op2, L)) { //  se entrambi gli operandi sono loop-invariant rispetto al loop
             loopInvariantInsts.push_back(binOp);
             errs() << "[FASE 1] Trovata loop-invariant: ";
             binOp->print(errs());
@@ -30,7 +30,6 @@ bool isInstructionInvariant (Instruction &I, Loop *L) {
     return false;
 }
 
-// Ricorsivamente verifica se un operando ha una definizione loop-invariant
 bool isOperandInvariant(Value *op, Loop *L) {
     if (isa<Constant>(op)) return true;
 
@@ -41,7 +40,7 @@ bool isOperandInvariant(Value *op, Loop *L) {
         if (std::find(loopInvariantInsts.begin(), loopInvariantInsts.end(), inst) != loopInvariantInsts.end())
             return true;
         
-        // Controllo ricorsivo: tutti i suoi operandi sono loop-invariant?
+        // Controllo ricorsivo: tutti i suoi operandi sono loop-invariant? (se non già marcati tali)
         if (isInstructionInvariant(*inst, L)) {
             loopInvariantInsts.push_back(inst);
             return true;
@@ -65,4 +64,3 @@ std::vector<Instruction*> fase1(Loop *L) {
     return loopInvariantInsts;
 }
 
-// parto da var = a+b, guardo b, non l'ho mai vista quindi chiamo ancora isinstructioninvariant, quindi partendo da var io vado a controllare b alla fine --> ricorsione

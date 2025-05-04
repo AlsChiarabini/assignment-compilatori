@@ -13,7 +13,8 @@
 using namespace llvm;
 
 namespace{
-	// implementare changed
+
+  //la visita del Loop parte dal loop stesso e continua nei sub loop
   bool visitaLoop(Loop *L) {
     bool IR_changed = false;
     std::vector<Instruction*> InvariantInsts = fase1(L);
@@ -28,12 +29,12 @@ namespace{
     return IR_changed;
 }
 
-// TODO: sistema questione changed
+
 bool LICM(LoopInfo &LI) {
   bool changed = false;
   for (Loop *L : LI) {
       if (visitaLoop(L))
-        changed = true; // se fai ottimizzazione vera, puoi gestire questo in modo preciso
+        changed = true; 
   }
   return changed;
 }
@@ -47,7 +48,7 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     // Ottieni l'analisi LoopInfo
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
-    bool changed = LICM(LI); // Da togliere bool a questo punto
+    bool changed = LICM(LI); 
 
     if (changed)
       errs() << "IR cambiata\n";  
@@ -58,7 +59,7 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
   static bool isRequired() { return true; }
 };
 
-} // namespace
+} 
 
 // Plugin registration
 extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {

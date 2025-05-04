@@ -85,25 +85,3 @@ bool fase3(Loop *L, std::vector<Instruction*> InstsForCodeMotion) {
 }
 
 
-
-
-
-/*
-bool instr1ComesBeforeinstr2(Instruction *a, Instruction *b) {
-    BasicBlock *blockA = a->getParent();
-    BasicBlock *blockB = b->getParent();
-
-    if (blockA == blockB) {
-        return b->comesBefore(a);
-    }
-
-    Function *F = blockA->getParent();
-    for (BasicBlock &BB : *F) {
-        if (&BB == blockA) return false;
-        if (&BB == blockB) return true;
-    }
-
-    errs() << "Qua non devo mai arrivarci, ERRORE (per debugggg)";
-    return false;
-}
-*/
