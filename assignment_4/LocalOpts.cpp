@@ -5,39 +5,11 @@
 #include "llvm/Analysis/LoopInfo.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/Dominators.h"
-
-#include "fase1.cpp"
-#include "fase2.cpp"    
-#include "fase3.cpp"
+#include "llvm/Analysis/PostDominators.h"
 
 using namespace llvm;
 
 namespace{
-
-  //la visita del Loop parte dal loop stesso e continua nei sub loop
-  bool visitaLoop(Loop *L) {
-    bool IR_changed = false;
-    std::vector<Instruction*> InvariantInsts = fase1(L);
-    std::vector<Instruction*> InstsForCodeMotion = fase2(L, InvariantInsts);
-    if (fase3(L, InstsForCodeMotion))
-        IR_changed = true;
-
-    for (Loop *SubL : L->getSubLoops()) {
-        if (visitaLoop(SubL))
-            IR_changed = true;
-    }
-    return IR_changed;
-}
-
-
-bool LICM(LoopInfo &LI) {
-  bool changed = false;
-  for (Loop *L : LI) {
-      if (visitaLoop(L))
-        changed = true; 
-  }
-  return changed;
-}
 
 
 struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
@@ -48,12 +20,12 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     // Ottieni l'analisi LoopInfo
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
-    bool changed = LICM(LI); 
-
-    if (changed)
-      errs() << "IR cambiata\n";  
+    // Ottieni l'analisi DominatorTree
+    DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
+    // Ottieni l'analisi PostDominatorTree
+    PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
   
-    return changed ? PreservedAnalyses::none() : PreservedAnalyses::all();
+    return PreservedAnalyses::all();
   }
 
   static bool isRequired() { return true; }
@@ -69,7 +41,7 @@ extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo llvmGetPassPluginIn
       PB.registerPipelineParsingCallback(
         [](StringRef Name, FunctionPassManager &FPM,
            ArrayRef<PassBuilder::PipelineElement>) {
-          if (Name == "myLICM") {
+          if (Name == "myLoopFusion") {
             FPM.addPass(MyFunctionPass());
             return true;
           }
