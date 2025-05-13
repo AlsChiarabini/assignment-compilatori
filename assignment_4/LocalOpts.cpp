@@ -24,6 +24,7 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
     // Ottieni l'analisi PostDominatorTree
     PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
+    errs()<<"prova\n";
   
     return PreservedAnalyses::all();
   }
