@@ -54,6 +54,19 @@ BasicBlock *getGuardBlock(Loop *L, DominatorTree &DT) {
     return nullptr;
 }
 
+bool singleBranchBlock(BasicBlock *BB) {
+    // Controlla se il blocco ha esattamente una sola istruzione
+    if (BB->size() != 1)
+        return false;
+
+    // Prendi la prima (e unica) istruzione
+    Instruction &I = BB->front();
+
+    // Verifica se è una BranchInst
+    return isa<BranchInst>(I);
+}
+
+
 
 
 void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
@@ -79,10 +92,12 @@ void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
 
         // Caso normale
         if (L0ExitSucc && L1Preheader &&
-            L0ExitSucc == L1Preheader) {
+            L0ExitSucc == L1Preheader &&
+            singleBranchBlock(L1Preheader))
+            {
             adjacent = true;
             errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso normale).\n";
-        }
+            }
 
         // Caso guarded loop [da controllare], non conviene prima controllare L0 sia guarded?
         if (!adjacent && L0Guard && L1Preheader) {

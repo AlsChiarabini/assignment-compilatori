@@ -5,11 +5,14 @@ int main(){
 	int n = 1;
 	std::cin >> n;
 	if (n>0){
-		for (int i=0; i < 10 ; i++)
+		for (int i=0; i < 10 ; i++) {
 			a[i] = i;
+			n = -1;
+		}
 	}
-	for (int j=0; j < 10; j++)
+	if (n>0) {
+		for (int j=0; j < 10; j++)
 		b[j] = a[j];
-
+	}
 	return a[0] + b[9];
 }
