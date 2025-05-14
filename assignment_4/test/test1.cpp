@@ -6,5 +6,5 @@ int main(){
 	for (int j=0; j < 10; j++)
 		b[j] = a[j];
 
-	return 0;
+	return a[0] + b[9];
 }
