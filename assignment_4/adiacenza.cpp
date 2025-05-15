@@ -55,16 +55,82 @@ BasicBlock *getGuardBlock(Loop *L, DominatorTree &DT) {
 }
 
 bool singleBranchBlock(BasicBlock *BB) {
-    // Controlla se il blocco ha esattamente una sola istruzione
     if (BB->size() != 1)
         return false;
 
     // Prendi la prima (e unica) istruzione
     Instruction &I = BB->front();
-
-    // Verifica se è una BranchInst
     return isa<BranchInst>(I);
 }
+
+bool G1LinkedToG2(Loop *L0,BasicBlock *L0Guard,BasicBlock *L1Guard){
+	for (unsigned j = 0; j < L0Guard->getTerminator()->getNumSuccessors(); ++j) {
+		BasicBlock *succ = L0Guard->getTerminator()->getSuccessor(j);
+		if (!L0->contains(succ) && succ == L1Guard) {
+		            return true;
+		}
+	}
+	return false;
+}
+
+//Controllo che il guard Block abbia solo la istruzione condizionale e il salto
+bool onlyGuardBB(BasicBlock *BB) {
+    auto it = BB->begin();
+    if (it == BB->end())
+        return false;
+
+    Instruction *first = &*it;
+    auto *cmp = dyn_cast<ICmpInst>(first);
+    if (!cmp)
+        return false;
+
+    ++it;
+    if (it == BB->end())
+        return false;
+
+    Instruction *second = &*it;
+    auto *br = dyn_cast<BranchInst>(second);
+    if (!br)
+        return false;
+
+    ++it;
+    // Non ci devono essere altre istruzioni
+    return it == BB->end();
+}
+
+//Controlla che la guardia sia la stessa
+bool sameGuard(BasicBlock *G1, BasicBlock *G2) {
+
+    auto *BI1 = dyn_cast<BranchInst>(G1->getTerminator());
+    auto *BI2 = dyn_cast<BranchInst>(G2->getTerminator());
+
+    if (!BI1 || !BI1->isConditional() || !BI2 || !BI2->isConditional())
+        return false;
+
+    auto *Cond1 = dyn_cast<ICmpInst>(BI1->getCondition());
+    auto *Cond2 = dyn_cast<ICmpInst>(BI2->getCondition());
+
+    if (!Cond1 || !Cond2)
+        return false;
+
+    // Devono avere lo stesso predicato (eq, ne, sgt, ...)
+    if (Cond1->getPredicate() != Cond2->getPredicate())
+        return false;
+
+    //controllo ora gli operandi
+    Value *L1 = Cond1->getOperand(0);
+    Value *R1 = Cond1->getOperand(1);
+    Value *L2 = Cond2->getOperand(0);
+    Value *R2 = Cond2->getOperand(1);
+
+    if (Cond1->isCommutative()) {
+        return (L1 == L2 && R1 == R2) || (L1 == R2 && R1 == L2);
+    } else {
+        return (L1 == L2 && R1 == R2);
+    }
+}
+
+
 
 
 
@@ -82,33 +148,32 @@ void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
         Loop *L0 = Loops[i];
         Loop *L1 = Loops[i + 1];
 
-
-	      BasicBlock *L0Exit = L0->getExitingBlock();       //attenzione potrebbero essere di più, penso fallisca in tal caso il passo
-        BasicBlock *L0ExitSucc = getSingleLoopExitSuccessor(L0);
+        BasicBlock *L0Exit = getSingleLoopExitSuccessor(L0);
         BasicBlock *L1Preheader = L1->getLoopPreheader();
         BasicBlock *L0Guard = getGuardBlock(L0, DT);
+        BasicBlock *L1Guard = getGuardBlock(L1, DT);
+        
 
         bool adjacent = false;
 
         // Caso normale
-        if (L0ExitSucc && L1Preheader &&
-            L0ExitSucc == L1Preheader &&
+        if (L0Exit && L1Preheader &&
+            L0Exit == L1Preheader &&
             singleBranchBlock(L1Preheader))
             {
-            adjacent = true;
-            errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso normale).\n";
+		    adjacent = true;
+		    errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso normale).\n";
             }
 
-        // Caso guarded loop [da controllare], non conviene prima controllare L0 sia guarded?
-        if (!adjacent && L0Guard && L1Preheader) {
-            for (unsigned j = 0; j < L0Guard->getTerminator()->getNumSuccessors(); ++j) {
-                BasicBlock *succ = L0Guard->getTerminator()->getSuccessor(j);
-                if (!L0->contains(succ) && succ == L1Preheader) {
-                    adjacent = true;
-                    errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso guarded).\n";
-                    break;
-                }
-            }
+        // Caso guarded loop 
+        if (!adjacent && L0Guard && L1Guard) {
+        	if (sameGuard(L0Guard,L1Guard)  &&  G1LinkedToG2(L0,L0Guard,L1Guard)){
+        		if (singleBranchBlock(L0Exit) && singleBranchBlock(L1Preheader) && onlyGuardBB(L1Guard)){
+        			 adjacent = true;
+		    		errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso guarded).\n";
+		    	}
+        			
+        	}    
         }
 
         if (!adjacent) {
@@ -116,3 +181,4 @@ void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
         }
     }
 }
+
