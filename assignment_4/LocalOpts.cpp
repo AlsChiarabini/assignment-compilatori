@@ -30,6 +30,8 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
   
   //Qui chiamo la fase 1
    fase1Fusion(LI,DT);
+  //Qui chiamo la fase 3
+    fase3Fusion(LI,DT,PDT);
   
     return PreservedAnalyses::all();
   }
