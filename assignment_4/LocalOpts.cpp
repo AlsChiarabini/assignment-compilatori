@@ -10,6 +10,7 @@
 using namespace llvm;
 
 #include "adiacenza.cpp"
+#include "CFE.cpp"
 
 namespace{
 
