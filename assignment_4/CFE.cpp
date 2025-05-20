@@ -7,10 +7,29 @@
 #include "llvm/IR/Dominators.h"
 #include "llvm/Analysis/PostDominators.h"
 
+
 bool controlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorTree &PDT)
 {
-    BasicBlock *L0Header = L0->getHeader();
-    BasicBlock *L1Header = L1->getHeader();
+    BasicBlock *L0Header = nullptr;
+    BasicBlock *L1Header = nullptr;
+
+    /*
+        Se L0 e L1 hanno un guard block, allora il loro header è il guard block,
+        altrimenti il loro header è il header del loop.
+    */
+
+    if (BasicBlock *guard = getGuardBlock(L0, DT)) {
+        L0Header = guard;
+    } else {
+        L0Header = L0->getHeader();
+    }
+    
+    if (BasicBlock *guard = getGuardBlock(L1, DT)) {
+        L1Header = guard;
+    } else {
+        L1Header = L1->getHeader();
+    }
+    
 
     // L0 domina L1?
     bool L0DomL1 = DT.dominates(L0Header, L1Header);
