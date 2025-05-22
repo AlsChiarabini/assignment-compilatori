@@ -16,9 +16,10 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT) {
 
 	//Chiama qui tutte le fasi e dopo la trasformazione  
 	if (!fase1Fusion(L0,L1,DT,i))    continue;
+	if (!controlFlowEquivalent(L0,L1,DT,PDT)) continue;
 	
 	
-	errs() <<"\nLoop "<< i << " e " <<i+1 <<" passato tutte le fasi";
+	errs() <<"Loop "<< i << " e " <<i+1 <<" passato tutte le fasi\n";
 	IRChanged = true;
         //qui trasformazione
     }
