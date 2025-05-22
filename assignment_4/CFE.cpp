@@ -50,8 +50,7 @@ bool controlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorT
         return false;		
     }
 
-    // L0 domina L1?
-    //bool L0DomL1 = DT.dominates(L0Header, L1Header);
+
     
     bool L0DomL1 = true;
     std::set<BasicBlock*> DominatedSet;
@@ -60,8 +59,7 @@ bool controlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorT
     if (DominatedSet.find(L1Header) == DominatedSet.end())
            L0DomL1 = false;
     
-    // L1 postdomina L0?
-    //bool L1PostDomL0 = PDT.dominates(L1Header, L0Header);
+
      bool L1PostDomL0 = true;
      std::set<BasicBlock*> PostDominatedSet;
     
