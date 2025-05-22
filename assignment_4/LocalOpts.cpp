@@ -25,8 +25,9 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
     PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
     ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
+    DependenceInfo &DI = AM.getResult<DependenceAnalysis>(F);
     
-    bool changed = myLoopFusion(LI,DT,PDT,SE);
+    bool changed = myLoopFusion(LI,DT,PDT,SE,DI);
   
     return changed ? PreservedAnalyses::none() :PreservedAnalyses::all();
   }

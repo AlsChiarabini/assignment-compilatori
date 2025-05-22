@@ -1,8 +1,9 @@
 #include "adiacenza.cpp"
 #include "CFE.cpp"
 #include "SE.cpp"
+#include "negativeDep.cpp"
 
-bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarEvolution &SE) {
+bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarEvolution &SE,DependenceInfo &DI) {
     bool IRChanged = false;
     auto Loops = LI.getLoopsInPreorder(); 
 
@@ -19,12 +20,15 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarE
 	if (!fase1Fusion(L0,L1,DT,i))    	        passedAllTest = false;
 	if (!fase2Fusion(L0,L1,SE,i))			passedAllTest = false;
 	if (!controlFlowEquivalent(L0,L1,DT,PDT))       passedAllTest = false;
+	if (hasNegativeDistanceDependence(L0,L1,DI))    passedAllTest = false;
 
-	if (!passedAllTest)	continue;
+	if (!passedAllTest)	
+		continue;
 	
 	errs() <<"Loop "<< i << " e " <<i+1 <<" passato tutte le fasi\n";
-	IRChanged = true;
+	
         //qui trasformazione
+    	IRChanged = true;
     }
     return IRChanged;
 }
