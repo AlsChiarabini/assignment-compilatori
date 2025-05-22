@@ -21,6 +21,8 @@ bool sameTime(const SCEV *TC0, const SCEV *TC1, ScalarEvolution &SE, size_t i) {
     }
 }
 
+//estendi, la phinode oltre passare il controllo isa<SCEV...> deve essere uno degli operandi della icmp dell'header, per robustezza penso sia megio ottenere la 
+//  icmp dal branch (che è l'ultima istruzione del BB)
 PHINode* getIndVar(Loop *L, ScalarEvolution &SE) {
     for (auto &I : *L->getHeader()) {
         if (auto *phi = dyn_cast<PHINode>(&I)) {
