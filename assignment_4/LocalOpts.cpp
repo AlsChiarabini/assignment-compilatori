@@ -6,6 +6,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/Analysis/PostDominators.h"
+#include "llvm/Analysis/ScalarEvolution.h"
 
 using namespace llvm;
 
@@ -23,8 +24,9 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
     DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
     PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
+    ScalarEvolution &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
     
-    bool changed = myLoopFusion(LI,DT,PDT);
+    bool changed = myLoopFusion(LI,DT,PDT,SE);
   
     return changed ? PreservedAnalyses::none() :PreservedAnalyses::all();
   }

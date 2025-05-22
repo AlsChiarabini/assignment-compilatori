@@ -11,15 +11,12 @@ using namespace llvm;
 
 bool sameTime(const SCEV *TC0, const SCEV *TC1, ScalarEvolution &SE, size_t i) {
     if (isa<SCEVCouldNotCompute>(TC0) || isa<SCEVCouldNotCompute>(TC1)) {
-        errs() << "[FASE 2] L" << i << " e L" << i + 1 << ": trip count non determinabile.\n";
         return false;
     }
 
     if (TC0 == TC1) {
-        errs() << "[FASE 2] L" << i << " e L" << i + 1 << " iterano lo stesso numero di volte.\n";
         return true;
     } else {
-        errs() << "[FASE 2] L" << i << " e L" << i + 1 << " iterano un numero diverso di volte.\n";
         return false;
     }
 }
@@ -36,25 +33,22 @@ PHINode* getIndVar(Loop *L, ScalarEvolution &SE) {
     return nullptr;
 }
 
-void fase2Fusion(LoopInfo &LI, ScalarEvolution &SE) {
-    auto Loops = LI.getLoopsInPreorder();
-    if (Loops.size() < 2) return;
-
-    for (size_t i = 0; i + 1 < Loops.size(); ++i) {
-        Loop *L0 = Loops[i];
-        Loop *L1 = Loops[i + 1];
+bool fase2Fusion(Loop* L0,Loop *L1, ScalarEvolution &SE,int i) {
 
         const SCEV *TC0 = SE.getBackedgeTakenCount(L0);
         const SCEV *TC1 = SE.getBackedgeTakenCount(L1);
 
-        if (!sameTime(TC0, TC1, SE, i)) continue; // Vado alla prossima coppia di loop
+        if (!sameTime(TC0, TC1, SE, i)){ 
+        	errs() <<" [FASE 2] Fallita, loopTripCount diverso\n";
+        	return false;
+        }
 
         PHINode *phi0 = getIndVar(L0, SE);
         PHINode *phi1 = getIndVar(L1, SE);
 
         if (!phi0 || !phi1) {
             errs() << "[FASE 2] L" << i << " e L" << i + 1 << ": impossibile trovare IV valida.\n";
-            continue;
+            return false;
         }
 
         // Fare solo IV0 == IV1 è troppo rigido, se usa i e j sono diverse
@@ -73,9 +67,12 @@ void fase2Fusion(LoopInfo &LI, ScalarEvolution &SE) {
             SE.getTypeSizeInBits(AR0->getType()) == SE.getTypeSizeInBits(AR1->getType())) {
 
             errs() << "[FASE 2] IV di L" << i << " e L" << i + 1 << " sono semanticamente equivalenti.\n";
+            return true;
         } else {
             errs() << "[FASE 2] IV di L" << i << " e L" << i + 1 << " NON sono equivalenti.\n";
+            return true;
         }
-    }
+        errs() <<"[FASE 2] fallita\n";
+   	return false;
 }
 

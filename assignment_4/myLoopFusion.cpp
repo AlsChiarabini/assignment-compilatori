@@ -1,7 +1,8 @@
 #include "adiacenza.cpp"
 #include "CFE.cpp"
+#include "SE.cpp"
 
-bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT) {
+bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarEvolution &SE) {
     bool IRChanged = false;
     auto Loops = LI.getLoopsInPreorder(); 
 
@@ -15,8 +16,10 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT) {
         Loop *L1 = Loops[i + 1];
 
 	//Chiama qui tutte le fasi e dopo la trasformazione  
-	if (!fase1Fusion(L0,L1,DT,i))    continue;
-	if (!controlFlowEquivalent(L0,L1,DT,PDT)) continue;
+	if (!fase1Fusion(L0,L1,DT,i))    	        continue;
+	if (!fase2Fusion(L0,L1,SE,i))			continue;
+	if (!controlFlowEquivalent(L0,L1,DT,PDT))       continue;
+
 	
 	
 	errs() <<"Loop "<< i << " e " <<i+1 <<" passato tutte le fasi\n";
