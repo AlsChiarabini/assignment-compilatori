@@ -20,7 +20,7 @@ bool sameTime(const SCEV *TC0, const SCEV *TC1, ScalarEvolution &SE, size_t i) {
         return false;
     }
 }
-
+/*
 //estendi, la phinode oltre passare il controllo isa<SCEV...> deve essere uno degli operandi della icmp dell'header, per robustezza penso sia megio ottenere la 
 //  icmp dal branch (che è l'ultima istruzione del BB)
 PHINode* getIndVar(Loop *L, ScalarEvolution &SE) {
@@ -32,6 +32,35 @@ PHINode* getIndVar(Loop *L, ScalarEvolution &SE) {
             }
         }
     }
+    return nullptr;
+}
+*/
+// versione robusta di getIndVar
+PHINode* getIndVar(Loop *L, ScalarEvolution &SE) {
+    BasicBlock *Header = L->getHeader();
+
+    // Trova il branch condizionato dell'header
+    auto *br = dyn_cast<BranchInst>(Header->getTerminator());
+    if (!br || !br->isConditional()) return nullptr;
+
+    // Estrai la condizione del branch: dovrebbe essere un ICmp
+    auto *icmp = dyn_cast<ICmpInst>(br->getCondition());
+    if (!icmp) return nullptr;
+
+    // Come prima + controllo
+    for (auto &I : *Header) {
+        auto *phi = dyn_cast<PHINode>(&I);
+        if (!phi) break;  // le PHI stanno sempre in cima al blocco
+
+        const SCEV *scev = SE.getSCEV(phi);
+        if (!isa<SCEVAddRecExpr>(scev)) continue;
+
+        // Controllo che la PHI sia usata nella condizione del loop
+        if (icmp->getOperand(0) == phi || icmp->getOperand(1) == phi) {
+            return phi;
+        }
+    }
+
     return nullptr;
 }
 
