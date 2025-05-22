@@ -9,8 +9,8 @@
 
 using namespace llvm;
 
-#include "adiacenza.cpp"
-#include "CFE.cpp"
+#include "myLoopFusion.cpp"
+
 
 namespace{
 
@@ -19,21 +19,14 @@ struct MyFunctionPass : PassInfoMixin<MyFunctionPass> {
     if (F.isDeclaration())
       return PreservedAnalyses::all();
 
-    // Ottieni l'analisi LoopInfo
-    LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
 
-    // Ottieni l'analisi DominatorTree
+    LoopInfo &LI = AM.getResult<LoopAnalysis>(F);
     DominatorTree &DT = AM.getResult<DominatorTreeAnalysis>(F);
-    // Ottieni l'analisi PostDominatorTree
     PostDominatorTree &PDT = AM.getResult<PostDominatorTreeAnalysis>(F);
-    errs()<<"Avvio fase1\n";
+    
+    bool changed = myLoopFusion(LI,DT,PDT);
   
-  //Qui chiamo la fase 1
-   fase1Fusion(LI,DT);
-  //Qui chiamo la fase 3
-    fase3Fusion(LI,DT,PDT);
-  
-    return PreservedAnalyses::all();
+    return changed ? PreservedAnalyses::none() :PreservedAnalyses::all();
   }
 
   static bool isRequired() { return true; }

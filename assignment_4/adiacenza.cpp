@@ -46,7 +46,7 @@ BasicBlock *getGuardBlock(Loop *L, DominatorTree &DT) {
             else
                 ++succOutLoop;
         }
-	errs() << "-----------" << succInLoop << " " << succOutLoop <<"\n";
+	//errs() << "-----------" << succInLoop << " " << succOutLoop <<"\n";
         if (succInLoop == 1 && succOutLoop == 1)
             return Pred; // trovato il guard block
     }
@@ -135,18 +135,8 @@ bool sameGuard(BasicBlock *G1, BasicBlock *G2) {
 
 
 
-void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
- 	//Questa prima parte da sistemare, in generale  penso non va bene  (non considera nested loop)
-    auto Loops = LI.getLoopsInPreorder(); // ordinati in preorder, i sotto-loop dopo il padre
-	//di conseguenza anche questo non va bene
-    if (Loops.size() < 2) {
-        errs() << "[FASE 1 FUSION] Meno di due loop. Fusione non applicabile.\n";
-        return;
-    }
-
-    for (size_t i = 0; i + 1 < Loops.size(); ++i) {
-        Loop *L0 = Loops[i];
-        Loop *L1 = Loops[i + 1];
+bool fase1Fusion(Loop *L0,Loop *L1, DominatorTree &DT,int i) {
+ 
 
         BasicBlock *L0Exit = getSingleLoopExitSuccessor(L0);
         BasicBlock *L1Preheader = L1->getLoopPreheader();
@@ -163,6 +153,7 @@ void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
             {
 		    adjacent = true;
 		    errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso normale).\n";
+		    return adjacent;
             }
 
         // Caso guarded loop 
@@ -171,14 +162,12 @@ void fase1Fusion(LoopInfo &LI, DominatorTree &DT) {
         		if (singleBranchBlock(L0Exit) && singleBranchBlock(L1Preheader) && onlyGuardBB(L1Guard)){
         			 adjacent = true;
 		    		errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " sono adiacenti (caso guarded).\n";
-		    	}
-        			
+		    		return adjacent;
+		    	}			
         	}    
         }
-
-        if (!adjacent) {
-            errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " NON sono adiacenti.\n";
-        }
+        
+       errs() << "[FASE 1 FUSION] L" << i << " e L" << i + 1 << " NON sono adiacenti.\n";
+       return false;
     }
-}
 
