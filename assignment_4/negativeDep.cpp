@@ -37,7 +37,6 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA) {
             }
         }
     }
-    errs() <<"[FASE 4] Nessuna dipendenza negativa\n";
     return false;
 }
 
@@ -71,7 +70,7 @@ bool hasNegativeDistanceDependence(Loop *L1, Loop *L2, DependenceInfo &DA) {
         }
     }
 
-    // Nessuna dipendenza negativa rilevata
+    errs() <<"[FASE 4] Nessuna dipendenza negativa\n";
     return false;
 }
 

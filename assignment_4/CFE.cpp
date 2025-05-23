@@ -23,28 +23,26 @@ bool controlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorT
     BasicBlock *L0Header = nullptr;
     BasicBlock *L1Header = nullptr;
 
-    /*
-        Se L0 e L1 hanno un guard block, allora il loro header è il guard block,
-        altrimenti il loro header è l'header del loop.
-    */
-    bool isTheGuard1 = false;
-    bool isTheGuard2 = false;
-    if (BasicBlock *guard = getGuardBlock(L0, DT)) {
-        L0Header = guard;
-        isTheGuard1 = true;
-    } else {
-        L0Header = L0->getHeader();
-    }
     
-    if (BasicBlock *guard = getGuardBlock(L1, DT)) {
-        L1Header = guard;
-        isTheGuard2 = true;
+
+    //Consideriamo separatamente il caso Guarded   
+    bool guardedCase = false;
+   
+    BasicBlock *G1 = getGuardBlock(L0, DT);
+    BasicBlock *G2 = getGuardBlock(L1, DT);
+
+    if (G1 && G2 && !L0->contains(G2)) {
+	    L0Header = G1;
+	    L1Header = G2;
+	    guardedCase = true;
     } else {
-        L1Header = L1->getHeader();
-    }
+	    L0Header = L0->getHeader();
+	    L1Header = L1->getHeader();
+   }
+
     
     //Dobbiamo considerare "manualmente" il caso in cui i due cicli abbiano la guardia e questa sia la stessa (nel senso di stesso BB)
-    if (isTheGuard1 && isTheGuard2 &&  L0Header == L1Header){	
+    if ( guardedCase &&  L0Header == L1Header){	
     	
     	errs() <<"[Fase 3] CFE fallita.[guard uguali]\n";
         return false;		
