@@ -20,7 +20,7 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarE
 	if (!fase1Fusion(L0,L1,DT,i))    	        passedAllTest = false;
 	if (!fase2Fusion(L0,L1,SE,i))			passedAllTest = false;
 	if (!controlFlowEquivalent(L0,L1,DT,PDT))       passedAllTest = false;
-	if (hasNegativeDistanceDependence(L0,L1,DI))    passedAllTest = false;
+	if (hasNegativeDistanceDependence(L0,L1,DI,SE))    passedAllTest = false;
 
 	if (!passedAllTest)	
 		continue;
