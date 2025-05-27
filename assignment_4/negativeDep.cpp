@@ -6,79 +6,98 @@
 
 using namespace llvm;
 
+// Commentare le load del secondo ciclo con le store del primo (e ragionare sul viceversa) --> detto dal prof
+// Lavora con ScEv e primitive
 
-bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA,ScalarEvolution &SE) {
+Value *getPointerOperand(Instruction *I) {
+    if (auto *LI = dyn_cast<LoadInst>(I)) return LI->getPointerOperand();
+    if (auto *SI = dyn_cast<StoreInst>(I)) return SI->getPointerOperand();
+    return nullptr;
+}
+
+bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, ScalarEvolution &SE) {
     if (auto Dep = DA.depends(I1, I2, true)) {
-        errs() << "\n[Dipendenza rilevata tra le seguenti istruzioni:]\n";
+        errs() << "\n[Dipendenza rilevata tra:]\n";
         I1->print(errs()); errs() << "\n";
-        I2->print(errs()); errs() << "\n\n";
+        I2->print(errs()); errs() << "\n";
 
-        //qui dobbiamo distinguere tra dip negativa o no
         Value *Ptr1 = getPointerOperand(I1);
-	    Value *Ptr2 = getPointerOperand(I2);
+        Value *Ptr2 = getPointerOperand(I2);
+        if (!Ptr1 || !Ptr2) {
+            errs() << "Uno dei due puntatori è nullo\n";
+            return false;
+        }
 
-	    const SCEV *S1 = SE.getSCEV(Ptr1);
-	    const SCEV *S2 = SE.getSCEV(Ptr2);
+        const SCEV *S1 = SE.getSCEV(Ptr1);
+        const SCEV *S2 = SE.getSCEV(Ptr2);
 
-	    errs() << "SCEV1: " << *S1 << "\n";
-	    errs() << "SCEV2: " << *S2 << "\n";
+        errs() << "SCEV1: " << *S1 << "\n";
+        errs() << "SCEV2: " << *S2 << "\n";
 
-	    const SCEV *Diff = SE.getMinusSCEV(S2, S1); // Distanza tra gli accessi
+        const SCEVAddRecExpr *AR1 = dyn_cast<SCEVAddRecExpr>(S1);
+        const SCEVAddRecExpr *AR2 = dyn_cast<SCEVAddRecExpr>(S2);
 
-	    if (const SCEVConstant *CDiff = dyn_cast<SCEVConstant>(Diff)) {
-		int64_t D = CDiff->getAPInt().getSExtValue();
-		if (D < 0) {
-		    errs() << "Dipendenza negativa dedotta manualmente! Distanza: " << D << "\n";
-		    return true;
-		}
-	    } else {
-		errs() << "Differenza non costante\n";
-	    }
+        if (!AR1 || !AR2) {
+            errs() << "Almeno uno degli accessi non è un SCEVAddRecExpr\n";
+            return false;
+        }
+
+        const SCEV *Start1 = AR1->getStart();
+        const SCEV *Start2 = AR2->getStart();
+
+        errs() << "Start1: " << *Start1 << "\n";
+        errs() << "Start2: " << *Start2 << "\n";
+
+        const SCEV *DiffStart = SE.getMinusSCEV(Start1, Start2);
+
+        if (isa<SCEVCouldNotCompute>(DiffStart)) {
+            errs() << "⚠️ Differenza tra gli start non calcolabile (SCEVCouldNotCompute)\n";
+            return true;
+        }
+
+        errs() << "StartDiff = Start2 - Start1 = " << *DiffStart << "\n";
+
+        if (const SCEVConstant *CDiff = dyn_cast<SCEVConstant>(DiffStart)) {
+            int64_t D = CDiff->getAPInt().getSExtValue();
+            errs() << "Distanza costante rilevata: " << D << "\n";
+            if (D < 0) {
+                errs() << "⚠️ Dipendenza negativa trovata! Distanza: " << D << "\n";
+                return true;
+            }
+        } else {
+            errs() << "Differenza non costante: " << *DiffStart << "\n";
+            return true;
+        }
     }
     return false;
 }
 
- 
 
-
-
-bool hasNegativeDistanceDependence(Loop *L1, Loop *L2, DependenceInfo &DA,ScalarEvolution &SE) {
+bool hasNegativeDistanceDependence(Loop *L1, Loop *L2, DependenceInfo &DA, ScalarEvolution &SE) {
     SmallVector<Instruction *, 16> MemInstL1, MemInstL2;
 
-    // Estrai le istruzioni di L1 che leggono o scrivono memoria
     errs() << "Istruzioni load/store primo ciclo\n";
-    for (BasicBlock *BB : L1->blocks()) {
-        for (Instruction &I : *BB) {
-            if (I.mayReadOrWriteMemory()){
+    for (BasicBlock *BB : L1->blocks())
+        for (Instruction &I : *BB)
+            if (I.mayReadOrWriteMemory())
                 MemInstL1.push_back(&I);
-                I.print(errs()); errs() << "\n";
-            }
-        }
-    }
 
-    // Estrai le istruzioni di L2 che leggono o scrivono memoria
     errs() << "Istruzioni load/store secondo ciclo\n";
-    for (BasicBlock *BB : L2->blocks()) {
-        for (Instruction &I : *BB) {
-            if (I.mayReadOrWriteMemory()){
+    for (BasicBlock *BB : L2->blocks())
+        for (Instruction &I : *BB)
+            if (I.mayReadOrWriteMemory())
                 MemInstL2.push_back(&I);
-                I.print(errs()); errs() << "\n";
-            }
-        }
-    }
 
-    // Analizza ogni coppia tra le istruzioni selezionate
     for (Instruction *I1 : MemInstL1) {
         for (Instruction *I2 : MemInstL2) {
-            if (foundNegativeDep(I1,I2,DA,SE) ||  foundNegativeDep(I2,I1,DA,SE)){ //??entrambe le direzioni?
-            	errs() << "[FASE 4] Dipendenza negativa trovata\n";
-            	return true;
-            }
+            if (foundNegativeDep(I1, I2, DA, SE))
+                return true;
         }
     }
 
-    errs() <<"[FASE 4] Nessuna dipendenza negativa\n";
+    errs() << "[FASE 4] Nessuna dipendenza negativa\n";
     return false;
 }
+
 
 
