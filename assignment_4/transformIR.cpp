@@ -39,14 +39,12 @@ BasicBlock* getExitBlock(Loop *L) {
 }
 
 void fusion(Loop *L0, Loop *L1, ScalarEvolution &SE) {
-    errs() << "[FUSION] Trasformazione dell'IR...\n";
 
     PHINode *IV0 = getIndVar(L0, SE);
     PHINode *IV1 = getIndVar(L1, SE);
 
     if (IV0 && IV1) {
-        IV1->replaceAllUsesWith(IV0);
-        errs() << "[FUSION] IV sostituita correttamente\n";
+        IV1->replaceAllUsesWith(IV0);	
     } else {
         errs() << "[FUSION] Errore nell'ottenere le IV\n";
         return;
@@ -69,9 +67,8 @@ void fusion(Loop *L0, Loop *L1, ScalarEvolution &SE) {
 
     BranchInst *br = dyn_cast<BranchInst>(Tail0->getTerminator());
     br->setSuccessor(0, FirstBodyL1);
-    //NOTA: stiamo supponendo che il body abbia un semplice branch (non condizionale al latch che cambiamo con firstBodyL1)
 
-	// Qui facciamo la stessa supposizione
+
     BranchInst *br2 = dyn_cast<BranchInst>(Tail1->getTerminator());
     br2->setSuccessor(0, Latch0);
 

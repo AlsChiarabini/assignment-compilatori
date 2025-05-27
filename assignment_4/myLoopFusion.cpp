@@ -2,6 +2,7 @@
 #include "CFE.cpp"
 #include "SE.cpp"
 #include "negativeDep.cpp"
+#include "transformIR.cpp"
 
 bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarEvolution &SE,DependenceInfo &DI) {
     bool IRChanged = false;
@@ -28,6 +29,7 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarE
 	errs() <<"Loop "<< i << " e " <<i+1 <<" passato tutte le fasi\n";
 	
         //qui trasformazione
+        fusion(L0,L1,SE);
     	IRChanged = true;
     }
     return IRChanged;
