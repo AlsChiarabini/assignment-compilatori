@@ -112,7 +112,7 @@ bool hasNegativeDistanceDependence(Loop *L1, Loop *L2, DependenceInfo &DA) {
         }
     }
 
-    errs() << "[FASE 4] Nessuna dipendenza negativa\n";
+    errs() << "[FASE 4] Nessuna dipendenza negativa.\n";
     return false;
 }
 
