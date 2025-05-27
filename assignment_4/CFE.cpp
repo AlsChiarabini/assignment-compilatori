@@ -7,12 +7,12 @@ void dfs(DominatorTree &DT, BasicBlock *BB, std::set<BasicBlock*> &DominatedSet)
     }
 }
 
-void dfs(PostDominatorTree &DT, BasicBlock *BB, std::set<BasicBlock*> &DominatedSet) {
+void p_dfs(PostDominatorTree &DT, BasicBlock *BB, std::set<BasicBlock*> &DominatedSet) {
     DominatedSet.insert(BB);
     DomTreeNode *Node = DT.getNode(BB);
     for (DomTreeNode *Child : Node->children()) {
         BasicBlock *ChildBB = Child->getBlock();
-        dfs(DT, ChildBB, DominatedSet);
+        p_dfs(DT, ChildBB, DominatedSet);
     }
 }
 
@@ -61,7 +61,7 @@ bool controlFlowEquivalent(Loop *L0, Loop *L1, DominatorTree &DT, PostDominatorT
      bool L1PostDomL0 = true;
      std::set<BasicBlock*> PostDominatedSet;
     
-    dfs(PDT,L1Header, PostDominatedSet);
+    p_dfs(PDT,L1Header, PostDominatedSet);
     if (PostDominatedSet.find(L0Header) == PostDominatedSet.end())
            L1PostDomL0 = false;
 

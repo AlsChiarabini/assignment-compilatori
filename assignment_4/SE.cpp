@@ -97,13 +97,12 @@ bool fase2Fusion(Loop* L0,Loop *L1, ScalarEvolution &SE,int i) {
             AR0->getStepRecurrence(SE) == AR1->getStepRecurrence(SE) &&
             SE.getTypeSizeInBits(AR0->getType()) == SE.getTypeSizeInBits(AR1->getType())) {
 
-            errs() << "[FASE 2] IV di L" << i << " e L" << i + 1 << " sono semanticamente equivalenti.\n";
+            errs() << "[FASE 2] IV di L" << i << " e L" << i + 1 << " sono semanticamente equivalenti, fase 2 successo.\n";
             return true;
-        } else {
-            errs() << "[FASE 2] IV di L" << i << " e L" << i + 1 << " NON sono equivalenti.\n";
-            return true;
+        } 
+        else {
+            errs() << "[FASE 2] IV di L" << i << " e L" << i + 1 << " NON sono equivalenti, fase 2 fallita.\n";
+            return false;
         }
-        errs() <<"[FASE 2] fallita\n";
-   	return false;
 }
 
