@@ -29,7 +29,7 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT,PostDominatorTree &PDT,ScalarE
 	errs() <<"Loop "<< i << " e " <<i+1 <<" passato tutte le fasi\n";
 	
         //qui trasformazione
-        fusion(L0,L1,SE);
+        fusion(L0,L1,SE,DT);
     	IRChanged = true;
     }
     return IRChanged;
