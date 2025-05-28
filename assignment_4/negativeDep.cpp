@@ -53,12 +53,9 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
         const SCEV *Start1 = AR1->getStart();
         const SCEV *Start2 = AR2->getStart();
 	const SCEV *DiffStart = nullptr;
-	if (isStore(I1) && isLoad(I2)) {
-        	DiffStart = SE.getMinusSCEV(Start1, Start2);
-        }
-        if (isStore(I1) && isStore(I2)) {
-        	DiffStart = SE.getMinusSCEV(Start1, Start2);
-        }
+
+        DiffStart = SE.getMinusSCEV(Start1, Start2);
+        
         if (isa<SCEVCouldNotCompute>(DiffStart)) {
             errs() << "[FASE 4]Differenza tra gli start non calcolabile (SCEVCouldNotCompute)\n";
             return true;
