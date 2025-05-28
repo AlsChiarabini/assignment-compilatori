@@ -15,11 +15,20 @@ Value *getPointerOperand(Instruction *I) {
     return nullptr;
 }
 
+bool isLoad(Instruction *I) {
+    return isa<LoadInst>(I);
+}
+
+bool isStore(Instruction *I) {
+    return isa<StoreInst>(I);
+}
+
+
 bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, ScalarEvolution &SE) {
     if (auto Dep = DA.depends(I1, I2, true)) {
-        errs() << "\n[Dipendenza rilevata tra:]\n";
-        I1->print(errs()); errs() << "\n";
-        I2->print(errs()); errs() << "\n";
+        //errs() << "\n[Dipendenza rilevata tra:]\n";
+        //I1->print(errs()); errs() << "\n";
+        //I2->print(errs()); errs() << "\n";
 
         Value *Ptr1 = getPointerOperand(I1);
         Value *Ptr2 = getPointerOperand(I2);
@@ -38,28 +47,24 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
         const SCEVAddRecExpr *AR2 = dyn_cast<SCEVAddRecExpr>(S2);
 
         if (!AR1 || !AR2) {
-            errs() << "Almeno uno degli accessi non è un SCEVAddRecExpr\n";
+            errs() << "Almeno uno degli accessi non è un SCEVAddRecExpr (funzione ricorrente di i)\n";
             return false;
         }
-
         const SCEV *Start1 = AR1->getStart();
         const SCEV *Start2 = AR2->getStart();
-
-        errs() << "Start1: " << *Start1 << "\n";
-        errs() << "Start2: " << *Start2 << "\n";
-
-        const SCEV *DiffStart = SE.getMinusSCEV(Start1, Start2);
-
+	const SCEV *DiffStart = nullptr;
+	if (isStore(I1) && isLoad(I2)) {
+        	DiffStart = SE.getMinusSCEV(Start1, Start2);
+        }
+        if (isStore(I1) && isStore(I2)) {
+        	DiffStart = SE.getMinusSCEV(Start2, Start1);
+        }
         if (isa<SCEVCouldNotCompute>(DiffStart)) {
-            errs() << "⚠️ Differenza tra gli start non calcolabile (SCEVCouldNotCompute)\n";
+            errs() << "Differenza tra gli start non calcolabile (SCEVCouldNotCompute)\n";
             return true;
         }
-
-        errs() << "StartDiff = Start2 - Start1 = " << *DiffStart << "\n";
-
         if (const SCEVConstant *CDiff = dyn_cast<SCEVConstant>(DiffStart)) {
             int64_t D = CDiff->getAPInt().getSExtValue();
-            errs() << "Distanza costante rilevata: " << D << "\n";
             if (D < 0) {
                 errs() << "⚠️ Dipendenza negativa trovata! Distanza: " << D << "\n";
                 return true;
@@ -76,13 +81,11 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
 bool hasNegativeDistanceDependence(Loop *L1, Loop *L2, DependenceInfo &DA, ScalarEvolution &SE) {
     SmallVector<Instruction *, 16> MemInstL1, MemInstL2;
 
-    errs() << "Istruzioni load/store primo ciclo\n";
     for (BasicBlock *BB : L1->blocks())
         for (Instruction &I : *BB)
             if (I.mayReadOrWriteMemory())
                 MemInstL1.push_back(&I);
 
-    errs() << "Istruzioni load/store secondo ciclo\n";
     for (BasicBlock *BB : L2->blocks())
         for (Instruction &I : *BB)
             if (I.mayReadOrWriteMemory())
