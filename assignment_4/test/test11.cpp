@@ -4,7 +4,6 @@ int main(){
 	for (int i=4; i < 8 ; i++)
 		a[i] = i;
 	for (int j=4; j < 8; j++)
-		a[j-1] = j;		//WAW
-
+		a[j-1] = j;		
 	return a[0] + a[5];
 }
