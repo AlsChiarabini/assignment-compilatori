@@ -33,7 +33,7 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
         Value *Ptr1 = getPointerOperand(I1);
         Value *Ptr2 = getPointerOperand(I2);
         if (!Ptr1 || !Ptr2) {
-            errs() << "Uno dei due puntatori è nullo\n";
+            errs() << "[FASE 4]Uno dei due puntatori è nullo\n";
             return false;
         }
 
@@ -47,7 +47,7 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
         const SCEVAddRecExpr *AR2 = dyn_cast<SCEVAddRecExpr>(S2);
 
         if (!AR1 || !AR2) {
-            errs() << "Almeno uno degli accessi non è un SCEVAddRecExpr (funzione ricorrente di i)\n";
+            errs() << "[FASE 4]Almeno uno degli accessi non è un SCEVAddRecExpr (funzione ricorrente di i)\n";
             return false;
         }
         const SCEV *Start1 = AR1->getStart();
@@ -57,20 +57,20 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
         	DiffStart = SE.getMinusSCEV(Start1, Start2);
         }
         if (isStore(I1) && isStore(I2)) {
-        	DiffStart = SE.getMinusSCEV(Start2, Start1);
+        	DiffStart = SE.getMinusSCEV(Start1, Start2);
         }
         if (isa<SCEVCouldNotCompute>(DiffStart)) {
-            errs() << "Differenza tra gli start non calcolabile (SCEVCouldNotCompute)\n";
+            errs() << "[FASE 4]Differenza tra gli start non calcolabile (SCEVCouldNotCompute)\n";
             return true;
         }
         if (const SCEVConstant *CDiff = dyn_cast<SCEVConstant>(DiffStart)) {
             int64_t D = CDiff->getAPInt().getSExtValue();
             if (D < 0) {
-                errs() << "⚠️ Dipendenza negativa trovata! Distanza: " << D << "\n";
+                errs() << "[FASE 4] Dipendenza negativa trovata! Distanza: " << D << "\n";
                 return true;
             }
         } else {
-            errs() << "Differenza non costante: " << *DiffStart << "\n";
+            errs() << "[FASE 4]Differenza non costante: " << *DiffStart << "\n";
             return true;
         }
     }
