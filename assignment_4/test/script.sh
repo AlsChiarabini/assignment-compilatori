@@ -3,7 +3,7 @@
 # Script per compilare e ottimizzare testX.cpp in testX.ll
 
 # Numero di test
-for i in {1..13}; do
+for i in {1..15}; do
     SRC="test$i.cpp"
     IR="test$i.ll"
 
