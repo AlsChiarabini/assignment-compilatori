@@ -40,8 +40,8 @@ bool foundNegativeDep(Instruction *I1, Instruction *I2, DependenceInfo &DA, Scal
         const SCEV *S1 = SE.getSCEV(Ptr1);
         const SCEV *S2 = SE.getSCEV(Ptr2);
 
-        errs() << "SCEV1: " << *S1 << "\n";
-        errs() << "SCEV2: " << *S2 << "\n";
+        //errs() << "SCEV1: " << *S1 << "\n";
+        //errs() << "SCEV2: " << *S2 << "\n";
 
         const SCEVAddRecExpr *AR1 = dyn_cast<SCEVAddRecExpr>(S1);
         const SCEVAddRecExpr *AR2 = dyn_cast<SCEVAddRecExpr>(S2);
