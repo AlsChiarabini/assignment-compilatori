@@ -91,7 +91,18 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT, PostDominatorTree &PDT,
                   ScalarEvolution &SE, DependenceInfo &DI) {
     bool IRChanged = false;
 
-    auto TopLoops = LI.getTopLevelLoops();
+    //auto TopLoops = LI.getTopLevelLoops();
+    
+    SmallVector<Loop*, 4> temp = LI.getLoopsInPreorder();
+    std::vector<Loop*> allPreorderLoops(temp.begin(), temp.end());
+    std::vector<Loop*> TopLoops;
+
+    // Filtro 
+    for (Loop *L : allPreorderLoops) {
+        if (!L->getParentLoop()) {
+            TopLoops.push_back(L);
+        }
+    }
 
     // Provo prima a fondere i loop più innestati
     for (Loop *TopLoop : TopLoops) {
