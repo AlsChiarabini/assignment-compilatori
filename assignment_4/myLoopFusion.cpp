@@ -4,7 +4,7 @@
 #include "negativeDep.cpp"
 #include "transformIR.cpp"
 
-bool fuseSiblingLoops(Loop *ParentLoop,
+bool fondiLoopsStessoLivello(Loop *ParentLoop,
                       DominatorTree &DT,
                       PostDominatorTree &PDT,
                       ScalarEvolution &SE,
@@ -38,7 +38,7 @@ bool fuseSiblingLoops(Loop *ParentLoop,
 }
 
 
-bool processLoopRecursive(Loop *L,
+bool processaRic(Loop *L,
                           DominatorTree &DT,
                           PostDominatorTree &PDT,
                           ScalarEvolution &SE,
@@ -47,11 +47,11 @@ bool processLoopRecursive(Loop *L,
     bool Changed = false;
 
     for (Loop *SubL : L->getSubLoops()) {
-        Changed |= processLoopRecursive(SubL, DT, PDT, SE, DI, LI);
+        Changed |= processaRic(SubL, DT, PDT, SE, DI, LI);
     }
 
 
-    Changed |= fuseSiblingLoops(L, DT, PDT, SE, DI);
+    Changed |= fondiLoopsStessoLivello(L, DT, PDT, SE, DI);
 
     return Changed;
 }
@@ -91,22 +91,20 @@ bool myLoopFusion(LoopInfo &LI, DominatorTree &DT, PostDominatorTree &PDT,
                   ScalarEvolution &SE, DependenceInfo &DI) {
     bool IRChanged = false;
 
-    //auto TopLoops = LI.getTopLevelLoops();
     
     SmallVector<Loop*, 4> temp = LI.getLoopsInPreorder();
     std::vector<Loop*> allPreorderLoops(temp.begin(), temp.end());
     std::vector<Loop*> TopLoops;
 
-    // Filtro 
+    // Filtro prendendo i topLevel
     for (Loop *L : allPreorderLoops) {
         if (!L->getParentLoop()) {
             TopLoops.push_back(L);
         }
     }
 
-    // Provo prima a fondere i loop più innestati
     for (Loop *TopLoop : TopLoops) {
-        IRChanged |= processLoopRecursive(TopLoop, DT, PDT, SE, DI, LI);
+        IRChanged |= processaRic(TopLoop, DT, PDT, SE, DI, LI);
     }
 
     //Fusione dei top-level loop
